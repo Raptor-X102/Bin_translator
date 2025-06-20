@@ -1,0 +1,5 @@
+FUNC_BIN(ADD, "+")
+FUNC_BIN(SUB, "-")
+FUNC_BIN(MUL, "*")
+FUNC_BIN(DIV, "/")
+FUNC_UN(SQRT, "sqrt")

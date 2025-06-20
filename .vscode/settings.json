@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "utility": "cpp",
+        "initializer_list": "cpp",
+        "xutility": "cpp",
+        "cstddef": "cpp",
+        "type_traits": "cpp",
+        "xtr1common": "cpp"
+    }
+}
