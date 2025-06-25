@@ -1,0 +1,102 @@
+section .data
+	fmt_out db "%.3lf", 10, 0
+	fmt_in  db "%lf", 0
+
+section .text
+	global main
+	extern printf
+	extern scanf
+
+main:
+	PUSH RBP 
+	MOV RBP, RSP
+	SUB RSP, 0x20
+	MOV RDX, 0x4024000000000000
+	PUSH RDX 
+	MOVSD XMM0, [RSP]
+	ADD RSP, 0x8
+	MOVSD [RBP + 0xfffffff8], XMM0
+	CALL Check_alignment_odd
+	SUB RSP, RBX
+	PUSH QWORD [RBP + 0xfffffff8]
+	CALL fact
+	ADD RSP, RBX
+	MOVSD [RSP], XMM0
+	MOVSD XMM0, [RSP]
+	ADD RSP, 0x8
+	MOVSD [RBP + 0xfffffff0], XMM0
+	PUSH QWORD [RBP + 0xfffffff0]
+	MOVSD XMM1, [RSP]
+	MOV RDX, [RSP]
+	SUB RSP, 0x38
+	MOV RAX, 0x1
+	LEA RCX, [REL fmt_out]
+	CALL printf
+	ADD RSP, 0x40
+	MOV RDX, 0
+	PUSH RDX 
+	MOVSD XMM0, [RSP]
+	ADD RSP, 0x8
+	LEAVE
+	RET
+
+fact:
+	PUSH RBP 
+	MOV RBP, RSP
+	SUB RSP, 0x20
+	MOV RDX, 0x3ff0000000000000
+	PUSH RDX 
+	MOVSD XMM0, [RSP]
+	ADD RSP, 0x8
+	MOVSD [RBP + 0xfffffff8], XMM0
+.L0:
+	PUSH QWORD [RBP + 0x10]
+	MOV RDX, 0
+	PUSH RDX 
+	MOVSD XMM0, [RSP]
+	ADD RSP, 0x8
+	MOVSD XMM1, [RSP]
+	ADD RSP, 0x8
+	COMISD XMM1, XMM0
+	JA .L1
+	JMP .L2
+.L1:
+	PUSH QWORD [RBP + 0xfffffff8]
+	PUSH QWORD [RBP + 0x10]
+	MOVSD XMM0, [RSP]
+	ADD RSP, 0x8
+	MOVSD XMM1, [RSP]
+	MULSD XMM1, XMM0
+	MOVSD [RSP], XMM1
+	MOVSD XMM0, [RSP]
+	ADD RSP, 0x8
+	MOVSD [RBP + 0xfffffff8], XMM0
+	PUSH QWORD [RBP + 0x10]
+	MOV RDX, 0x3ff0000000000000
+	PUSH RDX 
+	MOVSD XMM0, [RSP]
+	ADD RSP, 0x8
+	MOVSD XMM1, [RSP]
+	SUBSD XMM1, XMM0
+	MOVSD [RSP], XMM1
+	MOVSD XMM0, [RSP]
+	ADD RSP, 0x8
+	MOVSD [RBP + 0x10], XMM0
+	JMP .L0
+.L2:
+	PUSH QWORD [RBP + 0xfffffff8]
+	MOVSD XMM0, [RSP]
+	ADD RSP, 0x8
+	LEAVE
+	RET
+
+Check_alignment_even:
+	MOV RBX, RSP
+	AND RBX, 0xf
+	RET
+
+Check_alignment_odd:
+	MOV RBX, RSP
+	NEG RBX
+	AND RBX, 0xf
+	RET

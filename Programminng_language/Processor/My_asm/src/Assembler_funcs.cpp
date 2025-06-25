@@ -16,7 +16,7 @@ void Compile_code(const char* compiling_file, const char* out_file, Labels* labe
     uint64_t file_size = get_file_size(compiling_file); DEBUG_PRINTF("Size was gotten\n");
 
     FILE* input_file = fopen(compiling_file, "rb");
-    if(!input_file) {
+    if (!input_file) {
 
         DEBUG_PRINTF("ERROR: file was not opened");
         return;
@@ -25,7 +25,7 @@ void Compile_code(const char* compiling_file, const char* out_file, Labels* labe
     uint64_t commands_amount = 0;
 
     FILE* output_file = fopen(out_file, "wb+");
-    if(!output_file) {
+    if (!output_file) {
 
         DEBUG_PRINTF("ERROR: file was not opened");
         return;
@@ -45,7 +45,7 @@ void Compile_code(const char* compiling_file, const char* out_file, Labels* labe
 
     size_t length = strlen(compiling_file);
     char* result_filename = (char*) calloc(length+5, sizeof(char));
-    if(compiling_file[length-2] == 'a' &&
+    if (compiling_file[length-2] == 'a' &&
        compiling_file[length-1] == 's' &&
        compiling_file[length-0] == 'm') {
 
@@ -80,7 +80,7 @@ uint64_t Convert_txt_to_code(FILE* input_file, FILE* output_file, uint64_t code_
 
     char* tmp_ptr = (char*) calloc(code_length * 8, sizeof(char));
     char* code_data = NULL;
-    if(tmp_ptr) {
+    if (tmp_ptr) {
 
         code_data = tmp_ptr;
         tmp_ptr = NULL;
@@ -94,7 +94,7 @@ uint64_t Convert_txt_to_code(FILE* input_file, FILE* output_file, uint64_t code_
 
     char* input_buffer = NULL;
     tmp_ptr = (char*) calloc(code_length+10, sizeof(char));
-    if(tmp_ptr) {
+    if (tmp_ptr) {
 
         input_buffer = tmp_ptr;
         tmp_ptr = NULL;
@@ -125,12 +125,12 @@ uint64_t Convert_txt_to_code(FILE* input_file, FILE* output_file, uint64_t code_
 
         for(int i = 0; i < sizeof(Commands) / sizeof(Commands[0]); i++) {
 
-            if(!strcmp(input_buffer+curr_pos, Commands[i].command_name)) { //Finding commands
+            if (!strcmp(input_buffer+curr_pos, Commands[i].command_name)) { //Finding commands
 
                 code_data[curr_code_byte] = (char) Commands[i].command_num;
                 curr_code_byte++;
 
-                if(Commands[i].args_amount > 0) {
+                if (Commands[i].args_amount > 0) {
 
                     curr_pos = inword_pos + 1;
                     Get_next_word(input_buffer, &curr_pos, &inword_pos, code_length);
@@ -143,13 +143,13 @@ uint64_t Convert_txt_to_code(FILE* input_file, FILE* output_file, uint64_t code_
         }
 
         char* tmp_ch_ptr = strchr(input_buffer+curr_pos, ':'); //finding labels
-        if(tmp_ch_ptr) {
+        if (tmp_ch_ptr) {
 
             *tmp_ch_ptr = '\0';
             Label_handle(code_data, &curr_code_byte, input_buffer+curr_pos, labels);
         }
 
-        else if(!cmd_found){ // finding numbers (for Draw and functions with more than 2 numbers as parametres)
+        else if (!cmd_found){ // finding numbers (for Draw and functions with more than 2 numbers as parametres)
             int64_t tmp_int = atoll(input_buffer+curr_pos);
             memcpy(&code_data[curr_code_byte], &tmp_int, sizeof(int64_t));
             curr_code_byte += sizeof(int64_t);
@@ -169,14 +169,14 @@ uint64_t Convert_txt_to_code(FILE* input_file, FILE* output_file, uint64_t code_
 void Get_next_word(char* input_buffer, uint64_t* curr_pos, uint64_t* inword_pos, uint64_t code_length) {
 
     DEBUG_PRINTF("\n\n");
-    while(*curr_pos < code_length &&
+    while (*curr_pos < code_length &&
           input_buffer[*curr_pos] != EOF) {
-        while(isspace(input_buffer[*curr_pos]))
+        while (isspace(input_buffer[*curr_pos]))
             (*curr_pos)++;
 
-        if(input_buffer[*curr_pos] == ';') {
+        if (input_buffer[*curr_pos] == ';') {
 
-            while(input_buffer[*curr_pos] != '\n')
+            while (input_buffer[*curr_pos] != '\n')
                 (*curr_pos)++;
 
             (*curr_pos)++;
@@ -185,7 +185,7 @@ void Get_next_word(char* input_buffer, uint64_t* curr_pos, uint64_t* inword_pos,
 
         *inword_pos = *curr_pos;
 
-        while(!isspace(input_buffer[*inword_pos]))
+        while (!isspace(input_buffer[*inword_pos]))
             (*inword_pos)++;
 
         input_buffer[*inword_pos] = '\0';
@@ -200,7 +200,7 @@ void ASM_dump(const char* code_data, uint64_t curr_code_byte) {
 
     for(int i = 0; i < curr_code_byte; i++) {
 
-        if(i % 16 == 0) {
+        if (i % 16 == 0) {
 
             DEBUG_PRINTF("\n");
 
@@ -217,7 +217,7 @@ void ASM_dump(const char* code_data, uint64_t curr_code_byte) {
 }
 void Labels_Ctor(Labels* labels, size_t labels_amount) {
 
-    if(!labels) {
+    if (!labels) {
 
         DEBUG_PRINTF("ERROR: Null ptr\n");
         return;
@@ -226,7 +226,7 @@ void Labels_Ctor(Labels* labels, size_t labels_amount) {
     labels->labels_amount = labels_amount;
     labels_data* tmp_ptr = (labels_data*) malloc(labels_amount*sizeof(labels_data));
 
-    if(tmp_ptr) {
+    if (tmp_ptr) {
 
         labels->labels_arr = tmp_ptr;
         tmp_ptr = NULL;
@@ -237,7 +237,7 @@ void Labels_Ctor(Labels* labels, size_t labels_amount) {
 }
 void Labels_Dtor(Labels* labels) {
 
-    if(!labels || !labels->labels_arr) {
+    if (!labels || !labels->labels_arr) {
 
         DEBUG_PRINTF("ERROR: Null ptr\n");
         return;
@@ -250,7 +250,7 @@ int64_t Find_label(const char* label_name, Labels* labels) {
 
     for(int label_pos = 0; label_pos < labels->labels_amount; label_pos++) {
 
-        if(!strcmp(label_name, labels->labels_arr[label_pos].label_name))
+        if (!strcmp(label_name, labels->labels_arr[label_pos].label_name))
             return label_pos;
 
     }
@@ -263,7 +263,7 @@ void Label_handle(char* code_data, uint64_t* curr_code_byte, const char* code_st
 
     int64_t label_pos = Find_label(code_str, labels);
 
-    if(label_pos >= 0) {
+    if (label_pos >= 0) {
 
         DEBUG_PRINTF("found\n");
         memcpy(&code_data[labels->labels_arr[label_pos].label_pos],
@@ -282,7 +282,7 @@ void Label_handle(char* code_data, uint64_t* curr_code_byte, const char* code_st
 
 /*bool Check_jmp_func(const char* prev_cmd) {
 
-    if(!strcmp(prev_cmd, "JA") || !strcmp(prev_cmd, "JAE") ||
+    if (!strcmp(prev_cmd, "JA") || !strcmp(prev_cmd, "JAE") ||
        !strcmp(prev_cmd, "JB") || !strcmp(prev_cmd, "JBE") ||
        !strcmp(prev_cmd, "JE") || !strcmp(prev_cmd, "JNE") ||
        !strcmp(prev_cmd, "JMP") || !strcmp(prev_cmd, "CALL"))
@@ -306,9 +306,9 @@ char Check_register(const char* code_str) {
 
     char* inword_pos = strstr(code_str, "X");
 
-    if(inword_pos) {
+    if (inword_pos) {
 
-        if(isalpha(*(inword_pos-1)))
+        if (isalpha(*(inword_pos-1)))
             return *(inword_pos-1) - 'A' + 1;
 
         else
@@ -320,7 +320,7 @@ char Check_register(const char* code_str) {
 
 bool Chech_brackets(const char* code_str) {
 
-    if(code_str[0] == '[' && code_str[strlen(code_str)-1] == ']')
+    if (code_str[0] == '[' && code_str[strlen(code_str)-1] == ']')
         return true;
 
     return false;
@@ -333,7 +333,7 @@ void ASM_Get_arg(char* code_data, uint64_t* curr_code_byte, const char* code_str
 
     char* tmp_ptr = strchr(code_str, '+');
 
-    if(tmp_ptr) {
+    if (tmp_ptr) {
 
         int tmp_const = NUMBER_MASK + REGISTER_MASK;
 
@@ -342,7 +342,7 @@ void ASM_Get_arg(char* code_data, uint64_t* curr_code_byte, const char* code_str
 
         code_data[*curr_code_byte+1] = Check_register(code_str);
 
-        if(Chech_brackets(code_str)) {
+        if (Chech_brackets(code_str)) {
 
             int64_t tmp_int = atoll(tmp_ptr+1);
             DEBUG_PRINTF("number + reg = %lld\n", tmp_int);
@@ -363,13 +363,13 @@ void ASM_Get_arg(char* code_data, uint64_t* curr_code_byte, const char* code_str
 
     else{
 
-        if(Chech_brackets(code_str)) {
+        if (Chech_brackets(code_str)) {
 
             code_data[*curr_code_byte] = RAM_MASK;
             DEBUG_PRINTF("[]\n");
             int push_register = Check_register(code_str);
 
-            if(push_register >= 0) {
+            if (push_register >= 0) {
 
                 DEBUG_PRINTF("%c%c\n", code_str[1], code_str[2]);
                 code_data[*curr_code_byte] += REGISTER_MASK;
@@ -390,7 +390,7 @@ void ASM_Get_arg(char* code_data, uint64_t* curr_code_byte, const char* code_str
 
             int push_register = Check_register(code_str);
 
-            if(push_register >= 0) {
+            if (push_register >= 0) {
 
                 DEBUG_PRINTF("%c%c\n", code_str[0], code_str[1]);
                 code_data[*curr_code_byte] = REGISTER_MASK;
@@ -401,10 +401,10 @@ void ASM_Get_arg(char* code_data, uint64_t* curr_code_byte, const char* code_str
             else {
                 double tmp_double = 0;
 
-                if(!strcmp(code_str, "NAN"))
+                if (!strcmp(code_str, "NAN"))
                     tmp_double = NAN;
 
-                else if(!strcmp(code_str, "INF"))
+                else if (!strcmp(code_str, "INF"))
                     tmp_double = INFINITY;
 
                 else
@@ -424,7 +424,7 @@ void ASM_Get_label(char* code_data, uint64_t* curr_code_byte, const char* code_s
 
     DEBUG_PRINTF("ASM_Get_label: %s\n", code_str);
     int64_t label_pos = Find_label(code_str, labels);
-    if(label_pos >= 0) {
+    if (label_pos >= 0) {
 
         memcpy(&code_data[*curr_code_byte], &labels->labels_arr[label_pos].label_pos, sizeof(uint64_t));
         *curr_code_byte += sizeof(uint64_t);

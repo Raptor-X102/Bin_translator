@@ -19,6 +19,7 @@ const int32_t Rel32_code_size = 4; // size in bytes encoding sequence of relativ
 const char Check_alignment_even[] = "Check_alignment_even";
 const char Check_alignment_odd[] = "Check_alignment_odd";
 const int Shadow_space = 32;       // windows stuff
+const int Code_alignment = 16;
 
 const int Main_prologue_length = 0x68; // WARNING! if ypu add more std funcs, it must be changed
 const int Main_epilogue_length = 11;

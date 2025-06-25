@@ -4,17 +4,17 @@ void StackCtor (Stack_t * stack, int64_t capacity, size_t element_size
                DEBUG_ON(,const void * const poison_val,const char * name,
                          const char * file, const char * func, int line))
 {
-    if(!stack) {
+    if (!stack) {
 
         fprintf(stderr, "ERROR: Stack_Null_Pointer\n");
         return;
     }
-    if(capacity < 0) {
+    if (capacity < 0) {
 
         fprintf(stderr, "Negative capacity, can't create stack");
         return;
     }
-    if(stack->Stack_Status) {
+    if (stack->Stack_Status) {
 
         fprintf(stderr, "Stack has already been constructed\n");
         return;
@@ -32,7 +32,7 @@ void StackCtor (Stack_t * stack, int64_t capacity, size_t element_size
                             ((capacity*element_size) % sizeof(uint64_t)) + 2*sizeof(uint64_t);
     stack->element_size = element_size;
     char* tmp = (char*) calloc(stack->mem_size_aligned, sizeof(char));
-    if(tmp) {
+    if (tmp) {
 
         stack->free_data = tmp;
         tmp = NULL;
@@ -70,14 +70,14 @@ void StackPush(Stack_t * stack, const void * value) {
 
     #ifndef NO_DEBUG
 
-    if(STACK_ASSERT(stack) || !value)
+    if (STACK_ASSERT(stack) || !value)
         return;
 
     #endif
 
-    if(stack->Stack_Status) {
-        if(stack->size >= stack->capacity-1)
-            if(!StackResize(stack, '+', 2))
+    if (stack->Stack_Status) {
+        if (stack->size >= stack->capacity-1)
+            if (!StackResize(stack, '+', 2))
                 return;
 
         memcpy((char*)stack->data+(stack->size++)*stack->element_size, value, stack->element_size);
@@ -96,13 +96,13 @@ void StackPop(Stack_t * stack, void * return_var) {
 
     #ifndef NO_DEBUG
 
-    if(STACK_ASSERT(stack) || !return_var)
+    if (STACK_ASSERT(stack) || !return_var)
         return;
 
     #endif
 
-    if(stack->Stack_Status) {
-        if(stack->size <= 0) {
+    if (stack->Stack_Status) {
+        if (stack->size <= 0) {
 
             fprintf(stderr, "ERROR: Capacity = 0, can't do StackPop()\n");
             return;
@@ -122,8 +122,8 @@ void StackPop(Stack_t * stack, void * return_var) {
 
         stack->size--;
 
-        if(stack->size < (stack->capacity/4) && stack->capacity > 128)
-            if(!StackResize(stack, '-', 2))
+        if (stack->size < (stack->capacity/4) && stack->capacity > 128)
+            if (!StackResize(stack, '-', 2))
                 return;
 
         #ifndef NO_HASH_PROTECTION
@@ -142,13 +142,13 @@ static bool StackResize(Stack_t * stack, const char option, ...) {
 
     size_t prev_mem_size_aligned = stack->mem_size_aligned;
 
-    if(option == '+')
+    if (option == '+')
     {
         va_list args;
         va_start(args, 1);
         double temp_coeff = va_arg(args, double);
         //printf("temp_coeff = %lg\n", temp_coeff);
-        if(temp_coeff > 1 && temp_coeff < 25)
+        if (temp_coeff > 1 && temp_coeff < 25)
             stack->capacity *= temp_coeff;
 
         else
@@ -156,7 +156,7 @@ static bool StackResize(Stack_t * stack, const char option, ...) {
 
         va_end(args);
 
-        if(stack->capacity == 0)
+        if (stack->capacity == 0)
             stack->capacity = 1;
 
         stack->mem_size_aligned = stack->capacity*stack->element_size +
@@ -164,7 +164,7 @@ static bool StackResize(Stack_t * stack, const char option, ...) {
                                  2*sizeof(uint64_t);
         char* tmp_ptr = NULL;
         tmp_ptr = (char*)realloc(stack->free_data, stack->mem_size_aligned);
-        if(tmp_ptr) {
+        if (tmp_ptr) {
 
             DEBUG_ON(printf("\nCapacity was increased\n\n");)
             stack->free_data = tmp_ptr;
@@ -204,12 +204,12 @@ static bool StackResize(Stack_t * stack, const char option, ...) {
         return true;
     }
 
-    if(option == '-')
+    if (option == '-')
     {
         va_list args;
         va_start(args, 1);
         double temp_coeff = va_arg(args, double);
-        if(temp_coeff > 1 && (int64_t)(stack->capacity/temp_coeff) >= stack->size)
+        if (temp_coeff > 1 && (int64_t)(stack->capacity/temp_coeff) >= stack->size)
             stack->capacity /= temp_coeff;
 
         else
@@ -223,7 +223,7 @@ static bool StackResize(Stack_t * stack, const char option, ...) {
 
         char* tmp_ptr = NULL;
         tmp_ptr = (char*)realloc(stack->free_data, stack->mem_size_aligned);
-        if(tmp_ptr) {
+        if (tmp_ptr) {
 
             DEBUG_ON(printf("\nCapacity was decreased\n\n");)
             stack->free_data = tmp_ptr;
@@ -254,7 +254,7 @@ static bool StackResize(Stack_t * stack, const char option, ...) {
 
         return true;
     }
-    if(option == '_') {
+    if (option == '_') {
 
         stack->capacity = stack->size-1;
 
@@ -264,7 +264,7 @@ static bool StackResize(Stack_t * stack, const char option, ...) {
 
         char* tmp_ptr = NULL;
         tmp_ptr = (char*)realloc(stack->free_data, stack->mem_size_aligned);
-        if(tmp_ptr) {
+        if (tmp_ptr) {
 
             DEBUG_ON(printf("\nCapacity was decreased\n\n");)
             stack->free_data = tmp_ptr;
@@ -307,11 +307,11 @@ void StackDtor (Stack_t * stack) {
 
     #ifndef NO_DEBUG
 
-    if(STACK_ASSERT(stack))
+    if (STACK_ASSERT(stack))
         return;
 
     #endif
-    if(stack->Stack_Status)
+    if (stack->Stack_Status)
         stack->Stack_Status = false;
         stack->size = 0;
         stack->capacity = 0;

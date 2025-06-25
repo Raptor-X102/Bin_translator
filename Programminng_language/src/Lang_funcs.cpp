@@ -4,7 +4,7 @@ Node* Lang_new_node(int node_type, const void* node_value, size_t node_val_size,
                     Node* left_node, Node* right_node) {
 
     Node_data* node_data_ptr = (Node_data*) calloc(Mem_blocks_amount, sizeof(Node_data));
-    if(!node_data_ptr) {
+    if (!node_data_ptr) {
 
         DEBUG_PRINTF("ERROR: memory was not allocated\n");
         return NULL;
@@ -14,7 +14,7 @@ Node* Lang_new_node(int node_type, const void* node_value, size_t node_val_size,
     memcpy(&node_data_ptr->value, node_value, node_val_size);
 
     Node* node = NULL;
-    if(!Create_new_node(&node, &node_data_ptr, sizeof(Node_data*)))
+    if (!Create_new_node(&node, &node_data_ptr, sizeof(Node_data*)))
         return NULL;
 
     node->left_node = left_node;
@@ -27,17 +27,17 @@ void Print_node_data(const void* data, FILE* file) {
 
     Node_data* tmp_node_data = NULL;
     memcpy(&tmp_node_data, data, sizeof(Node_data*));
-    switch(tmp_node_data->expression_type) {
+    switch (tmp_node_data->expression_type) {
         case NUM: {
 
             fprintf(file, "expression_type = %#X (NUM), \\n ", NUM);
             double tmp_double = 0;
             memcpy(&tmp_double, &tmp_node_data->value, sizeof(double));
 
-            if(fabs(tmp_double - M_PI) < Epsilon)
+            if (fabs(tmp_double - M_PI) < Epsilon)
                 fprintf(file, "value = pi");
 
-            else if(fabs(tmp_double - M_E) < Epsilon)
+            else if (fabs(tmp_double - M_E) < Epsilon)
                 fprintf(file, "value = e");
 
             else
@@ -59,7 +59,7 @@ void Print_node_data(const void* data, FILE* file) {
             fprintf(file, "expression_type = %#X (OP), \\n ", OP);
             int64_t tmp_int = 0;
             memcpy(&tmp_int, &tmp_node_data->value, sizeof(int64_t));
-            switch(tmp_int) {
+            switch (tmp_int) {
 
                 #define FUNC(func_name, func_full_name) case func_name:\
                                                                fprintf(file, "value = %s ", func_full_name);\
@@ -78,7 +78,7 @@ void Print_node_data(const void* data, FILE* file) {
                     DEBUG_PRINTF("ERROR: wrong expression value = %#X \n", tmp_int);
             }
             fprintf(file, "\n");
-            if(!tmp_int)
+            if (!tmp_int)
                 DEBUG_PRINTF("ERROR: wrong expression type (0 operation)\n");
 
             break;
@@ -98,7 +98,7 @@ void Print_node_data(const void* data, FILE* file) {
             fprintf(file, "expression_type = %#X (CONDITION), \\n ", CONDITION);
             int64_t tmp_int = 0;
             memcpy(&tmp_int, &tmp_node_data->value, sizeof(int64_t));
-            switch(tmp_int) {
+            switch (tmp_int) {
 
                 #define CONDITION(value, symbol, spu_code) case value:\
                                                     fprintf(file, "value = ");\
@@ -120,7 +120,7 @@ void Print_node_data(const void* data, FILE* file) {
             fprintf(file, "expression_type = %#X (SPECIAL_SYMBOL), \\n ", SPECIAL_SYMBOL);
             int64_t tmp_int = 0;
             memcpy(&tmp_int, &tmp_node_data->value, sizeof(int64_t));
-            switch(tmp_int) {
+            switch (tmp_int) {
 
                 #define SPECIAL_SYMBOL(value, symbol) case value:\
                                                           fprintf(file, "value = ");\
@@ -142,7 +142,7 @@ void Print_node_data(const void* data, FILE* file) {
             fprintf(file, "expression_type = %#X (KEY_WORD), \\n ", KEY_WORD);
             int64_t tmp_int = 0;
             memcpy(&tmp_int, &tmp_node_data->value, sizeof(int64_t));
-            switch(tmp_int) {
+            switch (tmp_int) {
 
                 #define KEY_WORD(value, symbol) case value:\
                                                     fprintf(file, "value = %s ", symbol);\
@@ -173,12 +173,12 @@ void Print_node_data(const void* data, FILE* file) {
 
 void Lang_dtor(Node* root) {
 
-    if(root) {
+    if (root) {
 
-        if(root->left_node)
+        if (root->left_node)
             Lang_dtor(root->left_node);
 
-        if(root->right_node)
+        if (root->right_node)
             Lang_dtor(root->right_node);
 
         Node_data* tmp_node_data_ptr = NULL;

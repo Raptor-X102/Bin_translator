@@ -3,7 +3,7 @@
 void Stack_Dump(const Stack_t * stack, void (* Printf_Format_Func)(const void * value),
                 const char * file, const char* func, int line) {
 
-    if(stack->Stack_Status) {
+    if (stack->Stack_Status) {
         printf("Stack_t [%p]\n", stack);
         printf("    called from %s:%d (%s)\n", file, line, func);
         DEBUG_ON(printf("    name \"%s\" born at %s:%d (%s) {\n",
@@ -69,7 +69,7 @@ void Stack_Dump_fo(const Stack_t * stack,const char * file_name, void (* Printf_
                 const char * curr_file, const char* func, int line) {
 
     FILE * file = fopen(file_name, "ab+");
-    if(stack->Stack_Status) {
+    if (stack->Stack_Status) {
         fprintf(file, "Stack_t [%p]\n", stack);
         fprintf(file, "    called from %s:%d (%s)\n", curr_file, line, func);
         DEBUG_ON(fprintf(file, "    name \"%s\" born at %s:%d (%s) {\n",
@@ -136,8 +136,8 @@ void Stack_Dump_fo(const Stack_t * stack,const char * file_name, void (* Printf_
 
 int StackAssert (Stack_t * stack, const char * file, const char* func, int line) {
         int error_code = Stack_error(stack);
-        if(error_code) {
-            if(!stack) {
+        if (error_code) {
+            if (!stack) {
 
                 DEBUG_ON(assert(error_code != Stack_Null_Pointer);)
                 return error_code;
@@ -154,40 +154,40 @@ int StackAssert (Stack_t * stack, const char * file, const char* func, int line)
 int Stack_error(const Stack_t * stack) {
 
     int error_code = 0;
-    if(!stack) {
+    if (!stack) {
         error_code += Stack_Null_Pointer;
         return error_code;
     }
-    if(!stack->data && stack->capacity != 0)
+    if (!stack->data && stack->capacity != 0)
         error_code += Data_Null_Pointer;
-    if(stack->capacity < 0)
+    if (stack->capacity < 0)
         error_code += Negative_Capacity;
-    if(stack->size < 0)
+    if (stack->size < 0)
         error_code += Negative_Size;
-    if(stack->capacity < stack->size)
+    if (stack->capacity < stack->size)
         error_code += Capacity_Less_Size;
 
     #ifndef NO_CANARY_PROTECTION
-        if(stack->left_struct_canary != Struct_left_protector)
+        if (stack->left_struct_canary != Struct_left_protector)
             error_code += Left_Struct_Canary_Is_Dead;
-        if(stack->right_struct_canary != Struct_right_protector)
+        if (stack->right_struct_canary != Struct_right_protector)
             error_code += Right_Struct_Canary_Is_Dead;
         uint64_t tmp = 0;
         memcpy(&tmp, (((char*)(stack->data)) - sizeof(uint64_t)), sizeof(uint64_t));
-        if(tmp !=  Data_left_protector)
+        if (tmp !=  Data_left_protector)
             error_code += Left_Data_Canary_Is_Dead;
         memcpy(&tmp, (((char*)(stack->free_data)) +
                           stack->mem_size_aligned -
                           sizeof(uint64_t)),
                           sizeof(uint64_t));
-        if(tmp !=  Data_right_protector)
+        if (tmp !=  Data_right_protector)
             error_code += Right_Data_Canary_Is_Dead;
     #endif
 
     #ifndef NO_HASH_PROTECTION
-        if(stack->struct_hash_sum != Hash_sum(stack, ((char*)&(stack->struct_hash_sum))-1))
+        if (stack->struct_hash_sum != Hash_sum(stack, ((char*)&(stack->struct_hash_sum))-1))
             error_code += Wrong_Struct_Hash;
-        if(stack->data_hash_sum != Hash_sum(stack->free_data,
+        if (stack->data_hash_sum != Hash_sum(stack->free_data,
                                             stack->free_data +
                                             stack->mem_size_aligned - 1))
             error_code += Wrong_Data_Hash;

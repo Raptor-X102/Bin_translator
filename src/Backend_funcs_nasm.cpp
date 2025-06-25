@@ -11,7 +11,7 @@ bool Compile_nasm(const char* output_file_name_nasm,
     main.var_len = strlen(main.var_name);
     Variable_data* main_ptr = &main;
     int64_t index = Find_func_data(func_list, &main_ptr);
-    if(index == -1) {
+    if (index == -1) {
 
         DEBUG_PRINTF("ERROR: 'main' function was not found\n");
         return false;
@@ -21,13 +21,13 @@ bool Compile_nasm(const char* output_file_name_nasm,
     INSERT_STRING_CONSTANT(&d_array_code, Prologue_text_nasm);
 
     int local_labels_count = 0;
-    if(!Compile_user_function_def_nasm(&d_array_code, root, func_list, &local_labels_count))
+    if (!Compile_user_function_def_nasm(&d_array_code, root, func_list, &local_labels_count))
         return false;
 
     Check_alignment_prologue_nasm(&d_array_code, func_list);
 
     FILE* output_file_nasm = fopen(output_file_name_nasm, "wb");
-    if(!output_file_nasm) {
+    if (!output_file_nasm) {
 
         DEBUG_PRINTF("ERROR: file was not opened\n");
         return false;
@@ -62,19 +62,19 @@ bool Compile_user_function_def_nasm(Dynamic_array* d_array_code,Node* root, Func
 
     Node_data* tmp_data = NULL;
     memcpy(&tmp_data, &root->node_data, sizeof(Node_data*));
-    if(tmp_data->value == ANGLE_BRACKET_CL && tmp_data->expression_type == SPECIAL_SYMBOL) {
+    if (tmp_data->value == ANGLE_BRACKET_CL && tmp_data->expression_type == SPECIAL_SYMBOL) {
 
-        if(root->left_node) {
+        if (root->left_node) {
 
             int local_labels_count_left = 0;
-            if(!Compile_user_function_def_nasm(d_array_code, root->left_node, func_list, &local_labels_count_left))
+            if (!Compile_user_function_def_nasm(d_array_code, root->left_node, func_list, &local_labels_count_left))
                 return false;
         }
 
-        if(root->right_node) {
+        if (root->right_node) {
 
             int local_labels_count_right = 0;
-            if(!Compile_user_function_def_nasm(d_array_code, root->right_node, func_list, &local_labels_count_right))
+            if (!Compile_user_function_def_nasm(d_array_code, root->right_node, func_list, &local_labels_count_right))
                return false;
         }
     }
@@ -82,7 +82,7 @@ bool Compile_user_function_def_nasm(Dynamic_array* d_array_code,Node* root, Func
     else {
 
         int64_t index = Find_func_data(func_list, &tmp_data->value);
-        if(index == -1) {
+        if (index == -1) {
 
             DEBUG_PRINTF("ERROR: this function was not inserted in func_data");
             return false;
@@ -100,7 +100,7 @@ bool Compile_user_function_def_nasm(Dynamic_array* d_array_code,Node* root, Func
         MOV_REG_REG_NASM(d_array_code, I_RBP, I_RSP);
         SUB_REG_IMM_NASM(d_array_code, I_RSP, stack_frame);
 
-        if(!Compile_operation_nasm(d_array_code, root->right_node, func_list, index, local_labels_count))
+        if (!Compile_operation_nasm(d_array_code, root->right_node, func_list, index, local_labels_count))
             return false;
     }
 
@@ -112,50 +112,50 @@ bool Compile_operation_nasm(Dynamic_array* d_array_code, Node* root, Func_data_l
 
     Node_data* tmp_data = NULL;
     memcpy(&tmp_data, &root->node_data, sizeof(Node_data*));
-    if(tmp_data->value == TAB && tmp_data->expression_type == SPECIAL_SYMBOL) {
+    if (tmp_data->value == TAB && tmp_data->expression_type == SPECIAL_SYMBOL) {
 
-        if(root->left_node) {
+        if (root->left_node) {
 
-            if(!Compile_operation_nasm(d_array_code, root->left_node, func_list, index, local_labels_count))
+            if (!Compile_operation_nasm(d_array_code, root->left_node, func_list, index, local_labels_count))
                 return false;
         }
 
-        if(root->right_node) {
+        if (root->right_node) {
 
-            if(!Compile_operation_nasm(d_array_code, root->right_node, func_list, index, local_labels_count))
+            if (!Compile_operation_nasm(d_array_code, root->right_node, func_list, index, local_labels_count))
                 return false;
         }
     }
 
     else {
 
-        if(tmp_data->value == IF && tmp_data->expression_type == KEY_WORD) {
+        if (tmp_data->value == IF && tmp_data->expression_type == KEY_WORD) {
 
-            if(!Compile_if_nasm(d_array_code, root, func_list, index, local_labels_count))
+            if (!Compile_if_nasm(d_array_code, root, func_list, index, local_labels_count))
                 return false;
         }
 
-        else if(tmp_data->value == WHILE && tmp_data->expression_type == KEY_WORD) {
+        else if (tmp_data->value == WHILE && tmp_data->expression_type == KEY_WORD) {
 
-            if(!Compile_while_nasm(d_array_code, root, func_list, index, local_labels_count))
+            if (!Compile_while_nasm(d_array_code, root, func_list, index, local_labels_count))
                 return false;
         }
 
-        else if(tmp_data->value == ASSIGNMENT && tmp_data->expression_type == SPECIAL_SYMBOL) {
+        else if (tmp_data->value == ASSIGNMENT && tmp_data->expression_type == SPECIAL_SYMBOL) {
 
-            if(!Compile_assignment_nasm(d_array_code, root, func_list, index))
+            if (!Compile_assignment_nasm(d_array_code, root, func_list, index))
                 return false;
         }
 
-        else if(tmp_data->expression_type == FUNCTION) {
+        else if (tmp_data->expression_type == FUNCTION) {
 
-            if(!Compile_user_function_nasm(d_array_code, root, func_list, index))
+            if (!Compile_user_function_nasm(d_array_code, root, func_list, index))
                 return false;
         }
 
-        else if(tmp_data->value == RETURN && tmp_data->expression_type == KEY_WORD) {
+        else if (tmp_data->value == RETURN && tmp_data->expression_type == KEY_WORD) {
 
-            if(!Compile_return_nasm(d_array_code, root, func_list, index))
+            if (!Compile_return_nasm(d_array_code, root, func_list, index))
                 return false;
         }
 
@@ -177,14 +177,14 @@ bool Compile_while_nasm(Dynamic_array* d_array_code, Node* root,
     (*local_labels_count)++;
     INSERT_LABEL(d_array_code, local_labels_count_cpy);
 
-    if(!Compile_condition_nasm(d_array_code, root->left_node, func_list, index,
+    if (!Compile_condition_nasm(d_array_code, root->left_node, func_list, index,
                               Direct_option, local_labels_count))
         return false;
 
     INSERT_LABEL(d_array_code, local_labels_count_cpy + 1);
 
-    if(root->right_node)
-        if(!Compile_operation_nasm(d_array_code, root->right_node, func_list, index, local_labels_count))
+    if (root->right_node)
+        if (!Compile_operation_nasm(d_array_code, root->right_node, func_list, index, local_labels_count))
             return false;
 
     JMP_NASM(d_array_code, local_labels_count_cpy);
@@ -198,19 +198,19 @@ bool Compile_if_nasm(Dynamic_array* d_array_code, Node* root,
 
     int symbols_written = 0;
     Node* condition_root = root->left_node, * body_node = root->right_node;
-    if(!Compile_condition_nasm(d_array_code, condition_root, func_list, index,
+    if (!Compile_condition_nasm(d_array_code, condition_root, func_list, index,
                               Direct_option, local_labels_count))
         return false;
 
     INSERT_LABEL(d_array_code, *(local_labels_count) - 2);
     int local_labels_count_cpy = *local_labels_count;
 
-    if(body_node->left_node)
-        if(!Compile_operation_nasm(d_array_code, body_node->left_node, func_list,
+    if (body_node->left_node)
+        if (!Compile_operation_nasm(d_array_code, body_node->left_node, func_list,
                                   index, local_labels_count))
             return false;
 
-    if(body_node->right_node) {
+    if (body_node->right_node) {
 
         JMP_NASM(d_array_code, (*local_labels_count));
         (*local_labels_count)++;
@@ -219,9 +219,9 @@ bool Compile_if_nasm(Dynamic_array* d_array_code, Node* root,
     INSERT_LABEL(d_array_code, local_labels_count_cpy - 1);
     local_labels_count_cpy = (*local_labels_count);
 
-    if(body_node->right_node) {
+    if (body_node->right_node) {
 
-        if(!Compile_operation_nasm(d_array_code, body_node->right_node, func_list,
+        if (!Compile_operation_nasm(d_array_code, body_node->right_node, func_list,
                                   index, local_labels_count))
             return false;
 
@@ -234,12 +234,12 @@ bool Compile_if_nasm(Dynamic_array* d_array_code, Node* root,
 bool Compile_condition_nasm(Dynamic_array* d_array_code, Node* root, Func_data_list* func_list, int64_t index,
                             int option, int* local_labels_count) {
 
-    if(root->left_node)
-        if(!Compile_operator_nasm(d_array_code, root->left_node, func_list, index))
+    if (root->left_node)
+        if (!Compile_operator_nasm(d_array_code, root->left_node, func_list, index))
             return Error_value;
 
-    if(root->right_node)
-        if(!Compile_operator_nasm(d_array_code, root->right_node, func_list, index))
+    if (root->right_node)
+        if (!Compile_operator_nasm(d_array_code, root->right_node, func_list, index))
             return Error_value;
 
     int32_t disp32 = 0, imm32 = Value_size;
@@ -256,9 +256,9 @@ bool Compile_condition_nasm(Dynamic_array* d_array_code, Node* root, Func_data_l
                                         JXX##_NASM(d_array_code, *local_labels_count);\
                                         break;
 
-    if(option == Direct_option) {
+    if (option == Direct_option) {
 
-        switch(tmp_data->value) {
+        switch (tmp_data->value) {
 
             #include "Conditions_code_gen_x64.h"
 
@@ -270,7 +270,7 @@ bool Compile_condition_nasm(Dynamic_array* d_array_code, Node* root, Func_data_l
 
     else {
 
-        switch(tmp_data->value) {
+        switch (tmp_data->value) {
 
             #include "Conditions_code_gen_reverse_x64.h"
 
@@ -292,8 +292,8 @@ bool Compile_condition_nasm(Dynamic_array* d_array_code, Node* root, Func_data_l
 bool Compile_return_nasm(Dynamic_array* d_array_code, Node* root, Func_data_list* func_list,
                         int64_t index) {
 
-    if(root->right_node)
-        if(!Compile_operator_nasm(d_array_code, root->right_node, func_list, index))
+    if (root->right_node)
+        if (!Compile_operator_nasm(d_array_code, root->right_node, func_list, index))
             return false;
 
     int32_t disp32 = 0, imm32 = Value_size;
@@ -324,11 +324,11 @@ bool Compile_assignment_nasm(Dynamic_array* d_array_code, Node* root, Func_data_
     int64_t var_index = Find_variable(&func_list->func_data[index].local_vars,
                                       var_data->var_name, var_data->var_len);
 
-    if(var_index == -1) {
+    if (var_index == -1) {
 
         var_index = Find_variable(&func_list->func_data[index].parameters,
                                   var_data->var_name, var_data->var_len);
-        if(var_index == -1) {
+        if (var_index == -1) {
 
             DEBUG_PRINTF("ERROR: variable '%.*s' was not found\n", var_data->var_len, var_data->var_name);
             return false;
@@ -353,20 +353,20 @@ bool Compile_operator_nasm(Dynamic_array* d_array_code, Node* root, Func_data_li
     int32_t disp32 = 0, imm32 = 0;
     memcpy(&tmp_data, &root->node_data, sizeof(Node_data*));
     int symbols_written = 0;
-    if(tmp_data->expression_type == OP) {
+    if (tmp_data->expression_type == OP) {
 
-        if(root->left_node)
-            if(!Compile_operator_nasm(d_array_code, root->left_node, func_list, index))
+        if (root->left_node)
+            if (!Compile_operator_nasm(d_array_code, root->left_node, func_list, index))
                 return false;
 
-        if(root->right_node)
-            if(!Compile_operator_nasm(d_array_code, root->right_node, func_list, index))
+        if (root->right_node)
+            if (!Compile_operator_nasm(d_array_code, root->right_node, func_list, index))
                 return false;
 
         disp32 = 0;
         imm32 = Value_size;
 
-        switch(tmp_data->value) {
+        switch (tmp_data->value) {
 
             #define FUNC_BIN(value, symbol) case value: {\
                                              MOVSD_XREG_MEM_DISP0_NASM(d_array_code, I_XMM0, I_RSP);\
@@ -406,18 +406,18 @@ bool Compile_operator_nasm(Dynamic_array* d_array_code, Node* root, Func_data_li
         MOVSD_MEM_XREG_DISP0_NASM(d_array_code, I_RSP, I_XMM1);
     }
 
-    else if(tmp_data->expression_type == VAR) {
+    else if (tmp_data->expression_type == VAR) {
 
         Variable_data* var_data = NULL;
         memcpy(&var_data, &tmp_data->value, sizeof(Variable_data*));
         int64_t var_index = Find_variable(&func_list->func_data[index].local_vars,
                                         var_data->var_name, var_data->var_len);
 
-        if(var_index == -1) {
+        if (var_index == -1) {
 
             var_index = Find_variable(&func_list->func_data[index].parameters,
                                     var_data->var_name, var_data->var_len);
-            if(var_index == -1) {
+            if (var_index == -1) {
 
                 DEBUG_PRINTF("ERROR: variable '%.*s' was not found\n", var_data->var_len, var_data->var_name);
                 return false;
@@ -433,7 +433,7 @@ bool Compile_operator_nasm(Dynamic_array* d_array_code, Node* root, Func_data_li
         }
     }
 
-    else if(tmp_data->expression_type == NUM) {
+    else if (tmp_data->expression_type == NUM) {
 
         double tmp_double = 0;
         memcpy(&tmp_double, &tmp_data->value, sizeof(double));
@@ -441,9 +441,9 @@ bool Compile_operator_nasm(Dynamic_array* d_array_code, Node* root, Func_data_li
         PUSH_REG_NASM(d_array_code, I_RDX);
     }
 
-    else if(tmp_data->expression_type == FUNCTION) {
+    else if (tmp_data->expression_type == FUNCTION) {
 
-        if(!Compile_user_function_nasm(d_array_code, root, func_list, index))
+        if (!Compile_user_function_nasm(d_array_code, root, func_list, index))
             return false;
     }
 
@@ -464,12 +464,12 @@ bool Compile_user_function_nasm(Dynamic_array* d_array_code, Node* root, Func_da
     Variable_data* var_data = NULL;
     memcpy(&var_data, &tmp_data->value, sizeof(Variable_data*));
 
-    if(!strncmp(var_data->var_name, "Out", var_data->var_len)) {        // TODO: make functions for 'Out' and 'In' insertion
+    if (!strncmp(var_data->var_name, "Out", var_data->var_len)) {        // TODO: make functions for 'Out' and 'In' insertion
 
         int32_t disp32 = 0, imm32 = 56;
         int parameters_pushed = 0;
         Compile_push_parameters_nasm(d_array_code, root->left_node, func_list, index, &parameters_pushed);
-        if(parameters_pushed != 1) {
+        if (parameters_pushed != 1) {
 
             DEBUG_PRINTF("ERROR: in func 'Out' wrong arguments amount\n");
             return false;
@@ -489,14 +489,14 @@ bool Compile_user_function_nasm(Dynamic_array* d_array_code, Node* root, Func_da
         ADD_REG_IMM_NASM(d_array_code, I_RSP, imm32);
     }
 
-    else if(!strncmp(var_data->var_name, "In", var_data->var_len)) {        // TODO: make functions for 'Out' and 'In' insertion
+    else if (!strncmp(var_data->var_name, "In", var_data->var_len)) {        // TODO: make functions for 'Out' and 'In' insertion
 
         int32_t disp32 = 0, imm32 = 64;
         SUB_REG_IMM_NASM(d_array_code, I_RSP, imm32);
         LEA_REG_RIP_REL_NASM(d_array_code, I_RCX, "fmt_in");        // TODO: make const or define "fmt_in"
 
         /*********Get parameter***********************************/
-        if(!root->left_node) {
+        if (!root->left_node) {
 
             DEBUG_PRINTF("ERROR: in func 'In' wrong arguments amount\n");
             return false;
@@ -508,11 +508,11 @@ bool Compile_user_function_nasm(Dynamic_array* d_array_code, Node* root, Func_da
         int64_t var_index = Find_variable(&func_list->func_data[index].local_vars,
                                         var_data->var_name, var_data->var_len);
 
-        if(var_index == -1) {
+        if (var_index == -1) {
 
             var_index = Find_variable(&func_list->func_data[index].parameters,
                                     var_data->var_name, var_data->var_len);
-            if(var_index == -1) {
+            if (var_index == -1) {
 
                 DEBUG_PRINTF("ERROR: variable '%.*s' was not found\n", var_data->var_len, var_data->var_name);
                 return false;
@@ -536,7 +536,7 @@ bool Compile_user_function_nasm(Dynamic_array* d_array_code, Node* root, Func_da
     else {
 
         int64_t callee_index = Find_func_data(func_list, &var_data);
-        if(callee_index == -1) {
+        if (callee_index == -1) {
 
             DEBUG_PRINTF("ERROR: '%.*s' function was not found\n", (size_t) var_data->var_len, var_data->var_name);
             return false;
@@ -544,7 +544,7 @@ bool Compile_user_function_nasm(Dynamic_array* d_array_code, Node* root, Func_da
 
         Variable_data check_alignment = {};
         int64_t parameters = (func_list->func_data[callee_index].parameters.free_var);
-        if(!(parameters % 2)) {
+        if (!(parameters % 2)) {
 
             check_alignment.var_name = strdup(Check_alignment_even);        // memleak, will be fixed later
             check_alignment.var_len = sizeof(Check_alignment_even) - 1;
@@ -566,7 +566,7 @@ bool Compile_user_function_nasm(Dynamic_array* d_array_code, Node* root, Func_da
                   func_list->func_data[callee_index].function->var_len);
         ADD_REG_REG_NASM(d_array_code, I_RSP, I_RBX);
 
-        if(Value_size*(parameters-1))
+        if (Value_size*(parameters-1))
             ADD_REG_IMM_NASM(d_array_code, I_RSP, Value_size*(parameters-1)); // need -1 to push into stack returning value
 
         int32_t disp32 = 0;
@@ -581,20 +581,20 @@ bool Compile_push_parameters_nasm(Dynamic_array* d_array_code, Node* root, Func_
 
     Node_data* tmp_data = NULL;
     memcpy(&tmp_data, &root->node_data, sizeof(Node_data*));
-    if(tmp_data->value == COMMA && tmp_data->expression_type == SPECIAL_SYMBOL) {
+    if (tmp_data->value == COMMA && tmp_data->expression_type == SPECIAL_SYMBOL) {
 
-        if(root->left_node)
-            if(!Compile_push_parameters_nasm(d_array_code, root->left_node, func_list, index, parameters_pushed))
+        if (root->left_node)
+            if (!Compile_push_parameters_nasm(d_array_code, root->left_node, func_list, index, parameters_pushed))
                 return false;
 
-        if(root->right_node)
-            if(!Compile_push_parameters_nasm(d_array_code, root->right_node, func_list, index, parameters_pushed))
+        if (root->right_node)
+            if (!Compile_push_parameters_nasm(d_array_code, root->right_node, func_list, index, parameters_pushed))
                 return false;
     }
 
     else {
 
-        if(!Compile_operator_nasm(d_array_code, root, func_list, index))
+        if (!Compile_operator_nasm(d_array_code, root, func_list, index))
             return false;
 
         *parameters_pushed += 1;

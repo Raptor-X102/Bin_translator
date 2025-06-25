@@ -3,13 +3,13 @@
 bool Compile_func(int argc, char* argv[]) {
 
     char** Input_files = Check_flags(argc, argv);
-    if(!Input_files)
+    if (!Input_files)
         return false;
 
     Buffer_data expression_buffer = {};
     Var_list var_list_functions = {};
 
-    if(!Var_list_ctor(&var_list_functions, Var_list_init_size))
+    if (!Var_list_ctor(&var_list_functions, Var_list_init_size))
         return NULL;
 
     Func_data_list func_list = {.free_element = 0};
@@ -18,26 +18,26 @@ bool Compile_func(int argc, char* argv[]) {
                                       &var_list_functions, &expression_buffer, &func_list,
                                       &lexeme_arr);
 
-    if(!root) {
+    if (!root) {
 
         DEBUG_PRINTF("ERROR: function returned NULL\n");
         return false;
     }
 
-    if(Input_files[My_asm_file_index])
-        if(!Compile_to_ASM(Input_files[My_asm_file_index], root, &func_list))
+    if (Input_files[My_asm_file_index])
+        if (!Compile_to_ASM(Input_files[My_asm_file_index], root, &func_list))
             return false;;
 
-    if(Input_files[Dbg_file_index])
-        if(!Tree_graph_debug(root, Input_files[Dbg_file_index], &Print_node_data))
+    if (Input_files[Dbg_file_index])
+        if (!Tree_graph_debug(root, Input_files[Dbg_file_index], &Print_node_data))
             return false;
 
-    if(Input_files[Asm_file_index])
-        if(!Compile_nasm(Input_files[Asm_file_index], root, &func_list))
+    if (Input_files[Asm_file_index])
+        if (!Compile_nasm(Input_files[Asm_file_index], root, &func_list))
             return false;
 
-    if(Input_files[Exe_file_index])
-        if(!Compile_x64(IN_OUT_MODULES_PATH, Input_files[Exe_file_index], root, &func_list))
+    if (Input_files[Exe_file_index])
+        if (!Compile_x64(IN_OUT_MODULES_PATH, Input_files[Exe_file_index], root, &func_list))
             return false;
 
 /****************DTOR & FREE********************************** */
@@ -50,7 +50,7 @@ bool Compile_func(int argc, char* argv[]) {
 
     for(int i = 0; i < File_types_total; i++) {
 
-        if(Input_files[i])
+        if (Input_files[i])
             free(Input_files[i]);
     }
 
@@ -71,9 +71,9 @@ char** Check_flags(int argc, char* argv[]) {
 
     for(int i = 0; i < argc; i++) {
 
-        if(!strncmp(argv[i], SRC_FLAG, SRC_FLAG_LEN)) {
+        if (!strncmp(argv[i], SRC_FLAG, SRC_FLAG_LEN)) {
 
-            if(i + 1 < argc) {
+            if (i + 1 < argc) {
 
                 Input_files[Src_file_index] = strdup(argv[i+1]);
                 src_flag_found = true;
@@ -86,9 +86,9 @@ char** Check_flags(int argc, char* argv[]) {
             }
         }
 
-        if(!strncmp(argv[i], MY_ASM_FLAG, MY_ASM_FLAG_LEN)) {
+        if (!strncmp(argv[i], MY_ASM_FLAG, MY_ASM_FLAG_LEN)) {
 
-            if(i + 1 < argc) {
+            if (i + 1 < argc) {
 
                 Input_files[My_asm_file_index] = strdup(argv[i+1]);
                 option_flag_found = true;
@@ -101,9 +101,9 @@ char** Check_flags(int argc, char* argv[]) {
             }
         }
 
-        if(!strncmp(argv[i], ASM_FLAG, ASM_FLAG_LEN)) {
+        if (!strncmp(argv[i], ASM_FLAG, ASM_FLAG_LEN)) {
 
-            if(i + 1 < argc) {
+            if (i + 1 < argc) {
 
                 Input_files[Asm_file_index] = strdup(argv[i+1]);
                 option_flag_found = true;
@@ -116,9 +116,9 @@ char** Check_flags(int argc, char* argv[]) {
             }
         }
 
-        if(!strncmp(argv[i], EXE_FLAG, EXE_FLAG_LEN)) {
+        if (!strncmp(argv[i], EXE_FLAG, EXE_FLAG_LEN)) {
 
-            if(i + 1 < argc) {
+            if (i + 1 < argc) {
 
                 Input_files[Exe_file_index] = strdup(argv[i+1]);
                 option_flag_found = true;
@@ -131,9 +131,9 @@ char** Check_flags(int argc, char* argv[]) {
             }
         }
 
-        if(!strncmp(argv[i], DBG_FLAG, DBG_FLAG_LEN)) {
+        if (!strncmp(argv[i], DBG_FLAG, DBG_FLAG_LEN)) {
 
-            if(i + 1 < argc) {
+            if (i + 1 < argc) {
 
                 Input_files[Dbg_file_index] = strdup(argv[i+1]);
             }
@@ -146,7 +146,7 @@ char** Check_flags(int argc, char* argv[]) {
         }
     }
 
-    if(!src_flag_found || !option_flag_found) {
+    if (!src_flag_found || !option_flag_found) {
 
         DEBUG_PRINTF("ERROR: invalid input format\n");
         return NULL;

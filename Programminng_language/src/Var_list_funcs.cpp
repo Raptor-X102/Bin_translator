@@ -3,7 +3,7 @@
 bool Var_list_ctor(Var_list* var_list, size_t init_size) {
 
     Variable_data* tmp_ptr = (Variable_data*) calloc(init_size, sizeof(Variable_data));
-    if(!tmp_ptr) {
+    if (!tmp_ptr) {
 
         DEBUG_PRINTF("ERROR: memory was not allocated\n\n");
         return false;
@@ -24,7 +24,7 @@ int64_t Find_func_data(Func_data_list* func_list, void* variable_data) {
 
     for(int index = 0; index < func_list->free_element; index++) {
 
-        if(var_data->var_len == func_list->func_data[index].function->var_len &&
+        if (var_data->var_len == func_list->func_data[index].function->var_len &&
            !strncmp(func_list->func_data[index].function->var_name, var_data->var_name, var_data->var_len))
             return index;
     }
@@ -75,7 +75,7 @@ int64_t Insert_check_funcs(Func_data_list* func_list, const char* name) {
 
 bool Var_list_dtor(Var_list* var_list) {
 
-    if(var_list && var_list->var_list) {
+    if (var_list && var_list->var_list) {
 
         free(var_list->var_list);
         var_list->status = false;
@@ -88,11 +88,11 @@ bool Var_list_dtor(Var_list* var_list) {
 
 int64_t Find_variable(Var_list* var_list, char* variable, uint64_t var_len) {
 
-    if(var_list->status) {
+    if (var_list->status) {
 
         for(int64_t index = 0; index < var_list->free_var; index++) {
 
-            if(!strncmp(var_list->var_list[index].var_name, variable, var_len)) {
+            if (!strncmp(var_list->var_list[index].var_name, variable, var_len)) {
 
                 return index;
             }
@@ -105,7 +105,7 @@ int64_t Find_variable(Var_list* var_list, char* variable, uint64_t var_len) {
 Variable_data* Create_variable_data(char* var_name, uint64_t var_len, double var_value, int64_t line, int64_t col) {
 
     Variable_data* var_data = (Variable_data*) calloc(1, sizeof(Variable_data));
-    if(!var_data) {
+    if (!var_data) {
 
         DEBUG_PRINTF("ERROR: memory was not allocated\n\n");
         return NULL;
@@ -123,7 +123,7 @@ Variable_data* Create_variable_data(char* var_name, uint64_t var_len, double var
 int64_t Insert_var(Var_list* var_list, char* variable, double var_value, uint64_t var_len) {
 
     int64_t index = Find_variable(var_list, variable, var_len);
-    if(index >= 0) {
+    if (index >= 0) {
 
         var_list->var_list[index].var_value = var_value;
     }
@@ -131,8 +131,8 @@ int64_t Insert_var(Var_list* var_list, char* variable, double var_value, uint64_
     else {
 
 
-        if(var_list->free_var >= var_list->var_list_size)
-            if(!Var_list_expand(var_list))
+        if (var_list->free_var >= var_list->var_list_size)
+            if (!Var_list_expand(var_list))
                 return Var_list_error_value;
 
         var_list->var_list[var_list->free_var].var_value = var_value;
@@ -153,7 +153,7 @@ bool Var_list_expand(Var_list* var_list) {
     Variable_data* tmp_ptr = (Variable_data*) realloc(var_list->var_list,
                                                       var_list->var_list_size *
                                                       sizeof(Variable_data));
-    if(!tmp_ptr) {
+    if (!tmp_ptr) {
 
         DEBUG_PRINTF("ERROR: memory was not allocated\n\n");
         return false;

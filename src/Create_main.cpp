@@ -8,7 +8,7 @@ Func_instr_params* Create_main(const char* filename1, const char* filename2,
     size_t file_size = get_file_size(filename1);
 
     FILE* input_file = fopen(filename1, "rb");
-    if(!input_file) {
+    if (!input_file) {
 
         DEBUG_PRINTF("ERROR: file was not opened\n");
         return NULL;
@@ -25,7 +25,7 @@ Func_instr_params* Create_main(const char* filename1, const char* filename2,
                         (2 << (i-Base_asm_volatile_strings_amount));
 
     char* file_buffer = (char*) calloc(buffer_size, sizeof(char));
-    if(!file_buffer)  {
+    if (!file_buffer)  {
 
         DEBUG_PRINTF("ERROR: memory was not allocated\n");
         return NULL;
@@ -38,7 +38,7 @@ Func_instr_params* Create_main(const char* filename1, const char* filename2,
 /**********************NAME MODIFICATIONS************************************************************************ */
     char* filename_buffer = (char*) calloc(strlen(filename2) + Filename_buffer_add, sizeof(char));
     char* dot_ptr = strchr(filename2, '.');
-    if(!dot_ptr)
+    if (!dot_ptr)
         sprintf(filename_buffer, "%s.cpp");
 
     else {
@@ -50,7 +50,7 @@ Func_instr_params* Create_main(const char* filename1, const char* filename2,
 /***************************************************************************************************************** */
 
     FILE* output_file = fopen(filename_buffer, "wb");
-    if(!input_file) {
+    if (!input_file) {
 
         DEBUG_PRINTF("ERROR: file was not opened\n");
         return NULL;
@@ -59,7 +59,7 @@ Func_instr_params* Create_main(const char* filename1, const char* filename2,
     size_t written_bytes = 0;
     for(int i = 0; i < Base_asm_volatile_strings_amount; i++) {
 
-        if((nop_amount & (1 << i))) {
+        if ((nop_amount & (1 << i))) {
 
             memcpy(file_buffer + written_bytes,
                    Asm_string_array[i],
@@ -71,7 +71,7 @@ Func_instr_params* Create_main(const char* filename1, const char* filename2,
 
     for(int i = Base_asm_volatile_strings_amount; i < Instructions_bytes_limit; i++) {
 
-        if((nop_amount & (1 << i))) {
+        if ((nop_amount & (1 << i))) {
 
             for(int j = 0; j < (2 << (i-Base_asm_volatile_strings_amount)); j++) {
 
@@ -98,14 +98,14 @@ Func_instr_params* Create_main(const char* filename1, const char* filename2,
     file_size = get_file_size(target);
     *buffer_size_ptr = file_size;
     file_buffer = (char*) calloc(file_size, sizeof(char));
-    if(!file_buffer)  {
+    if (!file_buffer)  {
 
         DEBUG_PRINTF("ERROR: memory was not allocated\n");
         return NULL;
     }
 
     FILE* target_file = fopen(target, "rb");
-    if(!target_file) {
+    if (!target_file) {
 
         DEBUG_PRINTF("ERROR: file was not opened\n");
         return NULL;
@@ -122,7 +122,7 @@ Func_instr_params* Create_main(const char* filename1, const char* filename2,
     *buffer = file_buffer;
 
     INITIALIZE_FUNCS_PARAMS(funcs_params)
-    if(!Get_all_funcs_offset(file_buffer, file_size, funcs_params))
+    if (!Get_all_funcs_offset(file_buffer, file_size, funcs_params))
         return NULL;
 
     int fclose_result = fclose(target_file);

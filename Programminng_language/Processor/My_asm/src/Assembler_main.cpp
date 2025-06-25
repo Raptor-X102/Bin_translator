@@ -6,7 +6,7 @@ int main(int argc, char* argv[]) {
     char* input_file_name = NULL;
     char* output_file_name = NULL;
 
-    if(!Check_r_w_flags(CHECK_R_W, argv, argc, &input_file_name, &output_file_name)) {
+    if (!Check_r_w_flags(CHECK_R_W, argv, argc, &input_file_name, &output_file_name)) {
 
         DEBUG_PRINTF("ERROR: flags check failed\n");
         return 0;

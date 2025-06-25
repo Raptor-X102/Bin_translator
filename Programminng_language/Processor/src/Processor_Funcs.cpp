@@ -28,7 +28,7 @@ void SPU_Ctor(SPU_data * processor, const char* filename) {
 
     double* tmp_ptr = (double*) calloc(RAM_Size, sizeof(double));
 
-    if(tmp_ptr) {
+    if (tmp_ptr) {
 
         processor->RAM = tmp_ptr;
         tmp_ptr = NULL;
@@ -39,9 +39,9 @@ void SPU_Ctor(SPU_data * processor, const char* filename) {
 
 void SPU_Run(SPU_data * processor) {
 
-    while(true) {
+    while (true) {
 
-        if(processor->cmd_code[processor->IP] == CMD_HLT)
+        if (processor->cmd_code[processor->IP] == CMD_HLT)
             break;
 
         else
@@ -55,7 +55,7 @@ void Read_code_file(SPU_data * processor, const char* file_name) {
 
     FILE * file = fopen(file_name, "rb");
 
-    if(!file) {
+    if (!file) {
 
         DEBUG_PRINTF("ERROR: file was not opened\n");
         return;
@@ -65,7 +65,7 @@ void Read_code_file(SPU_data * processor, const char* file_name) {
     int version = 0;
 
     fread(signature, sizeof(char), 5, file);
-    if(ferror(file)) {
+    if (ferror(file)) {
 
         DEBUG_PRINTF("ERROR: fread failed\n");
         return;
@@ -73,7 +73,7 @@ void Read_code_file(SPU_data * processor, const char* file_name) {
     DEBUG_PRINTF("%s\n", signature);
 
     fread(&version, sizeof(int), 1, file);
-    if(ferror(file)) {
+    if (ferror(file)) {
 
         DEBUG_PRINTF("ERROR: fread failed\n");
         return;
@@ -81,17 +81,17 @@ void Read_code_file(SPU_data * processor, const char* file_name) {
     DEBUG_PRINTF("%d\n", version);
 
     fread(&(processor->code_size), sizeof(uint64_t), 1, file);
-    if(ferror(file)) {
+    if (ferror(file)) {
 
         DEBUG_PRINTF("ERROR: fread failed\n");
         return;
     }
 
-    if(processor->code_size) {
+    if (processor->code_size) {
 
         char* tmp = (char*) calloc(processor->code_size+10, sizeof(char));
 
-        if(tmp) {
+        if (tmp) {
 
             processor->cmd_code = tmp;
             tmp = NULL;
@@ -111,7 +111,7 @@ void Read_code_file(SPU_data * processor, const char* file_name) {
     }
 
     fread(processor->cmd_code, sizeof(char), processor->code_size, file);
-    if(ferror(file)) {
+    if (ferror(file)) {
 
         DEBUG_PRINTF("ERROR: fread failed\n");
         return;
@@ -129,17 +129,17 @@ double Get_push_arg(SPU_data* processor) {
     int option_byte = processor->cmd_code[processor->IP+1];
     processor->IP += 2;
 
-    if(option_byte & RAM_MASK) {
+    if (option_byte & RAM_MASK) {
 
         int64_t result = 0;
 
-        if(option_byte & REGISTER_MASK) {
+        if (option_byte & REGISTER_MASK) {
 
             result += (int64_t) processor->registers[processor->cmd_code[processor->IP]];
             processor->IP++;
         }
 
-        if(option_byte & NUMBER_MASK) {
+        if (option_byte & NUMBER_MASK) {
 
             int64_t temp_int = 0;
             memcpy(&temp_int, &processor->cmd_code[processor->IP], sizeof(int64_t));
@@ -154,13 +154,13 @@ double Get_push_arg(SPU_data* processor) {
 
         double result = 0;
 
-        if(option_byte & REGISTER_MASK) {
+        if (option_byte & REGISTER_MASK) {
 
             result += processor->registers[processor->cmd_code[processor->IP]];
             processor->IP++;
         }
 
-        if(option_byte & NUMBER_MASK) {
+        if (option_byte & NUMBER_MASK) {
 
                 double temp_int = 0;
                 memcpy(&temp_int, &processor->cmd_code[processor->IP], sizeof(double));
@@ -189,15 +189,15 @@ void* Get_pop_arg(SPU_data* processor) {
     processor->IP += 2;
     int64_t result = 0;
 
-    if(option_byte & RAM_MASK) {
+    if (option_byte & RAM_MASK) {
 
-        if(option_byte & REGISTER_MASK) {
+        if (option_byte & REGISTER_MASK) {
 
             result += (int64_t)processor->registers[processor->cmd_code[processor->IP]];
             processor->IP++;
         }
 
-        if(option_byte & NUMBER_MASK) {
+        if (option_byte & NUMBER_MASK) {
 
             int64_t temp_int = 0;
             memcpy(&temp_int, &processor->cmd_code[processor->IP], sizeof(int64_t));
@@ -261,7 +261,7 @@ void SPU_J##type(SPU_data* processor) {\
     StackPop(&(processor->stack), &pop1);\
     StackPop(&(processor->stack), &pop2);\
 \
-    if(pop1 sign pop2)\
+    if (pop1 sign pop2)\
         memcpy(&processor->IP, &processor->cmd_code[processor->IP+1], sizeof(uint64_t));\
 \
     else\
@@ -280,7 +280,7 @@ void SPU_Je(SPU_data* processor) {
     StackPop(&(processor->stack), &pop1);
     StackPop(&(processor->stack), &pop2);
 
-    if(fabs(pop1 - pop2) < Epsilon)
+    if (fabs(pop1 - pop2) < Epsilon)
         memcpy(&processor->IP, &processor->cmd_code[processor->IP+1], sizeof(uint64_t));
 
     else
@@ -295,7 +295,7 @@ void SPU_Jne(SPU_data* processor) {
     StackPop(&(processor->stack), &pop1);
     StackPop(&(processor->stack), &pop2);
 
-    if(fabs(pop1 - pop2) > Epsilon)
+    if (fabs(pop1 - pop2) > Epsilon)
         memcpy(&processor->IP, &processor->cmd_code[processor->IP+1], sizeof(uint64_t));
 
     else

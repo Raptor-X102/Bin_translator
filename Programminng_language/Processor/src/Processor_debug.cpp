@@ -7,7 +7,7 @@ void SPU_Dump(const SPU_data * processor, void (* Printf_Format_Func)(const void
 
     DEBUG_PRINTF("code:  ");
     for(int commands_amount = 0; commands_amount < processor->code_size; commands_amount += scale) {
-        if(commands_amount >= scale)
+        if (commands_amount >= scale)
             DEBUG_PRINTF("\n       ");
         for(int i = commands_amount; i < commands_amount + scale && i < processor->code_size; i++)
             DEBUG_PRINTF("%8X ", i);
@@ -18,7 +18,7 @@ void SPU_Dump(const SPU_data * processor, void (* Printf_Format_Func)(const void
             DEBUG_PRINTF("%8X ", processor->cmd_code[i]);
         }
         DEBUG_PRINTF("\n");
-        if(processor->IP >= commands_amount && processor->IP < commands_amount + scale) {
+        if (processor->IP >= commands_amount && processor->IP < commands_amount + scale) {
             DEBUG_PRINTF("              ");
             for(int k = commands_amount; k < processor->IP; k++) {
 

@@ -3,7 +3,7 @@
 bool Dynamic_array_ctor(Dynamic_array *array, size_t initial_capacity, int fill_byte) {
 
     array->data = (char*) malloc(initial_capacity * sizeof(char));
-    if(!array->data) {
+    if (!array->data) {
 
         fprintf(stderr, "ERROR in func 'Dynamic_array_ctor': memory was not allocated\n");
         return false;
@@ -19,7 +19,7 @@ bool Dynamic_array_ctor(Dynamic_array *array, size_t initial_capacity, int fill_
 
 void Dynamic_array_dtor(Dynamic_array *array) {
 
-    if(array) {
+    if (array) {
 
         free(array->data);
         array->data = NULL;
@@ -34,11 +34,11 @@ bool _Dynamic_array_resize_if_needed(Dynamic_array *array, int size) {
 
         size_t new_capacity = array->capacity * Expansion_coeff;
         char* tmp_ptr = (char*) realloc(array->data, new_capacity * sizeof(char));
-        if(!tmp_ptr) {
+        if (!tmp_ptr) {
 
             new_capacity = array->capacity * 3 / 2;     // another try to reallocate, UB was here, but this thing also didn't help
             tmp_ptr = (char*) realloc(array->data, new_capacity * sizeof(char));
-            if(!tmp_ptr) {
+            if (!tmp_ptr) {
 
                 fprintf(stderr, "ERROR in func '_Dynamic_array_resize_if_needed': memory was not allocated\n");
                 free(array->data);

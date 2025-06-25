@@ -7,6 +7,6 @@ void Memcpy_safe(char* buffer_dst, char* buffer_src, size_t bytes_to_cpy) {
         memcpy(buffer_dst + i * Max_bytes_to_cpy, buffer_src + i * Max_bytes_to_cpy, Max_bytes_to_cpy);
 
     int remain = bytes_to_cpy % Max_bytes_to_cpy;
-    if(remain)
+    if (remain)
         memcpy(buffer_dst + times_cpy * Max_bytes_to_cpy, buffer_src + times_cpy * Max_bytes_to_cpy, remain);
 }

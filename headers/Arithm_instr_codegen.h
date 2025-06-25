@@ -29,7 +29,7 @@ static inline void name##_REG_MEM_DISP0(Dynamic_array* array, int reg, int mem_r
     INSERT_BYTE(array, name##_R_RM_OP); \
     INSERT_BYTE(array, MOD_DISP0 | ((reg & 7) << 3) | (mem_reg & 7)); \
     INSTR_DEBUG_PRINTF( #name " %s, [%s] = ", Registers_names[reg], Registers_names[mem_reg]);\
-    if(mem_reg == I_RSP) {\
+    if (mem_reg == I_RSP) {\
     INSERT_BYTE(array, SIB_RSP_ONLY);\
     INSTR_DEBUG_OUT_LOOP(array, 4)}\
     else {\
@@ -40,7 +40,7 @@ static inline void name##_MEM_REG_DISP0(Dynamic_array* array, int mem_reg, int r
     INSERT_BYTE(array, name##_RM_R_OP); \
     INSERT_BYTE(array, MOD_DISP0 | ((reg & 7) << 3) | (mem_reg & 7)); \
     INSTR_DEBUG_PRINTF( #name " [%s], %s = ", Registers_names[mem_reg], Registers_names[reg]);\
-    if(mem_reg == I_RSP) {\
+    if (mem_reg == I_RSP) {\
     INSERT_BYTE(array, SIB_RSP_ONLY);\
     INSTR_DEBUG_OUT_LOOP(array, 4) }\
     else {\

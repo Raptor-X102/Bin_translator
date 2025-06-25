@@ -32,10 +32,10 @@ const int Mem_to_check = 2;
         memcpy(&var_data, &tmp_data->value, sizeof(Variable_data*));\
         int64_t index = Find_variable(&func_list->func_data[func_list->free_element].parameters,\
                               var_data->var_name, var_data->var_len);\
-        if(index == -1) {\
+        if (index == -1) {\
             index = Find_variable(&func_list->func_data[func_list->free_element].local_vars,\
                                    var_data->var_name, var_data->var_len);\
-            if(index == -1) {\
+            if (index == -1) {\
                 index = Insert_var(&func_list->func_data[func_list->free_element].local_vars,\
                                         var_data->var_name, var_data->var_value, var_data->var_len);\
                 func_list->func_data[func_list->free_element].local_vars.var_list[index].RAM_index =\

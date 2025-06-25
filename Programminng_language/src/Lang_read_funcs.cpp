@@ -5,16 +5,16 @@ Node* Lang_read_expression(const char* filename, Var_list* func_name_list,
 						   Lexeme_array** lexeme_arr) {
 
 	*expression_buffer = Lang_read_file(filename);
-	if(!expression_buffer->buffer || expression_buffer->buffer_size < 0)
+	if (!expression_buffer->buffer || expression_buffer->buffer_size < 0)
 		return NULL;
 
 	*lexeme_arr = Lexeme_separator(expression_buffer->buffer, expression_buffer->buffer_size, func_name_list);
-	if(!(*lexeme_arr))
+	if (!(*lexeme_arr))
 		return NULL;
 
 	func_list->size = func_name_list->free_var + 2; // + 2 will be needed for extra func check_alignment
 	func_list->func_data = (Func_data*) calloc(func_list->size, sizeof(Func_data));
-	if(!func_list->func_data) {
+	if (!func_list->func_data) {
 
 		DEBUG_PRINTF("ERROR: memory was not allocated\n");
 		return NULL;
@@ -29,27 +29,27 @@ Buffer_data Lang_read_file(const char* filename) {
 	Buffer_data buffer_data = {};
 	int64_t file_size = get_file_size(filename);
 
-	if(file_size < 0)
+	if (file_size < 0)
 		return buffer_data;
 
 	buffer_data.buffer_size = file_size;
 
 	FILE* input_file = fopen(filename, "rb");
-	if(!input_file) {
+	if (!input_file) {
 
 		DEBUG_PRINTF("ERROR: file was not opened\n");
 		return buffer_data;
 	}
 
 	char* file_buffer = (char*) calloc(file_size, sizeof(char));
-	if(!file_buffer) {
+	if (!file_buffer) {
 
 		DEBUG_PRINTF("ERROR: memory was not allocated\n");
 		return buffer_data;
 	}
 
 	fread(file_buffer, sizeof(char), file_size, input_file);
-	if(ferror(input_file)) {
+	if (ferror(input_file)) {
 
 		DEBUG_PRINTF("ERROR: fread failed\n");
 		return buffer_data;
@@ -62,7 +62,7 @@ Buffer_data Lang_read_file(const char* filename) {
 
 bool Lexeme_array_dtor(Lexeme_array* lexeme_array) {
 
-	if(!lexeme_array || !lexeme_array->lex_arr) {
+	if (!lexeme_array || !lexeme_array->lex_arr) {
 
 		DEBUG_PRINTF("ERROR: null ptr\n");
 		return false;
@@ -72,7 +72,7 @@ bool Lexeme_array_dtor(Lexeme_array* lexeme_array) {
 
 		Node_data* tmp_data = NULL;
 		memcpy(&tmp_data, &lexeme_array->lex_arr[lex_index].root->node_data, sizeof(Node_data*));
-		if(tmp_data->expression_type == VAR || tmp_data->expression_type == FUNCTION) {
+		if (tmp_data->expression_type == VAR || tmp_data->expression_type == FUNCTION) {
 
 			Variable_data* var_data = NULL;
 			memcpy(&var_data, &tmp_data->value, sizeof(Variable_data*));
@@ -92,7 +92,7 @@ Lexeme_array* Lexeme_separator(char* expr_buffer, int64_t expr_buffer_size, Var_
 	lexeme_array->lex_arr = (Lexeme_data*) calloc(expr_buffer_size + Mem_to_check, sizeof(Lexeme_data));
 	size_t lexeme_array_pos = 0;
 
-	if(!lexeme_array) {
+	if (!lexeme_array) {
 
 		DEBUG_PRINTF("ERROR: memory was not allocated\n");
 		return NULL;
@@ -100,25 +100,25 @@ Lexeme_array* Lexeme_separator(char* expr_buffer, int64_t expr_buffer_size, Var_
 
 	for(int64_t curr_pos = 0, line = 1, col = 1; curr_pos < expr_buffer_size;) {
 
-		if(!Lang_get_next_symbol(expr_buffer, expr_buffer_size,
+		if (!Lang_get_next_symbol(expr_buffer, expr_buffer_size,
 								 &curr_pos, &line, &col))
 			break;
 
 		lexeme_array->lex_arr[lexeme_array_pos].line = line;
 		lexeme_array->lex_arr[lexeme_array_pos].col = col;
 
-		if(expr_buffer[curr_pos] == '\n') {
+		if (expr_buffer[curr_pos] == '\n') {
 
 			line++;
 			col = 1;
 		}
 
-		if(expr_buffer[curr_pos] == '\t') {
+		if (expr_buffer[curr_pos] == '\t') {
 
 			col += 4;
 		}
 
-		if(!strncmp(expr_buffer + curr_pos, "log", sizeof("log") - 1) &&
+		if (!strncmp(expr_buffer + curr_pos, "log", sizeof("log") - 1) &&
 				!isalpha(expr_buffer[curr_pos + sizeof("log") - 1])) {
 
 			lexeme_array->lex_arr[lexeme_array_pos].root = _LOG(NULL, NULL);
@@ -127,7 +127,7 @@ Lexeme_array* Lexeme_separator(char* expr_buffer, int64_t expr_buffer_size, Var_
 			lexeme_array_pos++;
 		}
 
-		else if(isdigit(expr_buffer[curr_pos])) {
+		else if (isdigit(expr_buffer[curr_pos])) {
 
 			double tmp_double = 0;
 			int num_len = 0;
@@ -139,7 +139,7 @@ Lexeme_array* Lexeme_separator(char* expr_buffer, int64_t expr_buffer_size, Var_
 		}
 
 		#define FUNC(func_name, func_full_name) \
-			else if(!strncmp(expr_buffer + curr_pos, func_full_name, sizeof(func_full_name) - 1) && \
+			else if (!strncmp(expr_buffer + curr_pos, func_full_name, sizeof(func_full_name) - 1) && \
 					!isalpha(expr_buffer[curr_pos + sizeof(func_full_name) - 1])) {\
 			\
 				lexeme_array->lex_arr[lexeme_array_pos].root = Lang_new_node(OP, &func_name, \
@@ -151,7 +151,7 @@ Lexeme_array* Lexeme_separator(char* expr_buffer, int64_t expr_buffer_size, Var_
 			}
 
 		#define FUNC_BASIC(func_name, func_full_name) \
-			else if(!strncmp(expr_buffer + curr_pos, func_full_name, sizeof(func_full_name) - 1)) {\
+			else if (!strncmp(expr_buffer + curr_pos, func_full_name, sizeof(func_full_name) - 1)) {\
 			\
 				lexeme_array->lex_arr[lexeme_array_pos].root = Lang_new_node(OP, &func_name, \
 																	 sizeof(int64_t), NULL, NULL);\
@@ -162,7 +162,7 @@ Lexeme_array* Lexeme_separator(char* expr_buffer, int64_t expr_buffer_size, Var_
 			}
 
 		#define KEY_WORD(func_name, func_full_name) \
-			else if(!strncmp(expr_buffer + curr_pos, func_full_name, sizeof(func_full_name) - 1) && \
+			else if (!strncmp(expr_buffer + curr_pos, func_full_name, sizeof(func_full_name) - 1) && \
 					!isalpha(expr_buffer[curr_pos + sizeof(func_full_name) - 1])) {\
 			\
 				lexeme_array->lex_arr[lexeme_array_pos].root = Lang_new_node(KEY_WORD, &func_name, \
@@ -191,13 +191,13 @@ Lexeme_array* Lexeme_separator(char* expr_buffer, int64_t expr_buffer_size, Var_
 														continue;\
 													}
 
-			switch(expr_buffer[curr_pos]) {
+			switch (expr_buffer[curr_pos]) {
 
 				#include "Special_symbols_code_gen.h"
 			}
 
 
-			if(expr_buffer[curr_pos] == 'e' && !isalpha(expr_buffer[curr_pos + 1])) {
+			if (expr_buffer[curr_pos] == 'e' && !isalpha(expr_buffer[curr_pos + 1])) {
 
 				double tmp_double = M_E;
 				curr_pos++;
@@ -206,7 +206,7 @@ Lexeme_array* Lexeme_separator(char* expr_buffer, int64_t expr_buffer_size, Var_
 				lexeme_array_pos++;
 			}
 
-			else if(!strncmp(expr_buffer + curr_pos, "pi", 2) && !isalpha(expr_buffer[curr_pos + 2])) {
+			else if (!strncmp(expr_buffer + curr_pos, "pi", 2) && !isalpha(expr_buffer[curr_pos + 2])) {
 
 				double tmp_double = M_PI;
 				curr_pos += 2;
@@ -215,7 +215,7 @@ Lexeme_array* Lexeme_separator(char* expr_buffer, int64_t expr_buffer_size, Var_
 				lexeme_array_pos++;
 			}
 
-			else if(!strncmp(expr_buffer + curr_pos, "INF", 3) && !isalpha(expr_buffer[curr_pos + 3])) {
+			else if (!strncmp(expr_buffer + curr_pos, "INF", 3) && !isalpha(expr_buffer[curr_pos + 3])) {
 
 				double tmp_double = INFINITY;
 				curr_pos += 3;
@@ -224,7 +224,7 @@ Lexeme_array* Lexeme_separator(char* expr_buffer, int64_t expr_buffer_size, Var_
 				lexeme_array_pos++;
 			}
 
-			else if(!strncmp(expr_buffer + curr_pos, "NAN", 3) && !isalpha(expr_buffer[curr_pos + 3])) {
+			else if (!strncmp(expr_buffer + curr_pos, "NAN", 3) && !isalpha(expr_buffer[curr_pos + 3])) {
 
 				double tmp_double = NAN;
 				curr_pos += 3;
@@ -233,20 +233,20 @@ Lexeme_array* Lexeme_separator(char* expr_buffer, int64_t expr_buffer_size, Var_
 				lexeme_array_pos++;
 			}
 
-			else if(isalpha(expr_buffer[curr_pos]) || expr_buffer[curr_pos] == '_'){
+			else if (isalpha(expr_buffer[curr_pos]) || expr_buffer[curr_pos] == '_'){
 
 				uint64_t pos_copy = curr_pos;
-				while(isalpha(expr_buffer[curr_pos]) || isdigit(expr_buffer[curr_pos]) || expr_buffer[curr_pos] == '_')
+				while (isalpha(expr_buffer[curr_pos]) || isdigit(expr_buffer[curr_pos]) || expr_buffer[curr_pos] == '_')
 					curr_pos++;
 
 				uint64_t var_len = curr_pos - pos_copy;
 				Variable_data* vl_ptr = NULL;
 				vl_ptr = Create_variable_data(expr_buffer + pos_copy, var_len, Var_list_init_value, line, col);
 
-				if(expr_buffer[curr_pos] == '(') {
+				if (expr_buffer[curr_pos] == '(') {
 
 					int64_t index = Insert_var(func_name_list, expr_buffer + pos_copy, Var_list_init_value, var_len);
-					if(index == Var_list_error_value) {
+					if (index == Var_list_error_value) {
 
 						free(lexeme_array->lex_arr);
 						free(lexeme_array);
@@ -289,7 +289,7 @@ Node* Get_Grammar(Lexeme_array* lexeme_array, int64_t* curr_lex, Func_data_list*
 	int offset = 0;
 
 	memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
-	if(tmp_data->value != ANGLE_BRACKET_OP || tmp_data->expression_type != SPECIAL_SYMBOL)
+	if (tmp_data->value != ANGLE_BRACKET_OP || tmp_data->expression_type != SPECIAL_SYMBOL)
 		SYNTAX_ERROR(lexeme_array, curr_lex);
 
 	(*curr_lex)++;
@@ -301,7 +301,7 @@ Node* Get_Grammar(Lexeme_array* lexeme_array, int64_t* curr_lex, Func_data_list*
 	Skip_lexemes(lexeme_array, curr_lex);
 
 	memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
-	while(tmp_data->value == ANGLE_BRACKET_OP &&
+	while (tmp_data->value == ANGLE_BRACKET_OP &&
 		  tmp_data->expression_type == SPECIAL_SYMBOL) {
 
 		(*curr_lex)++;
@@ -334,7 +334,7 @@ Node* Get_if(Lexeme_array* lexeme_array, int64_t* curr_lex, int* offset, Func_da
 
 	memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
 	Node* yes_node = NULL, * no_node = NULL;
-	if(tmp_data->value == YES && tmp_data->expression_type == KEY_WORD) {
+	if (tmp_data->value == YES && tmp_data->expression_type == KEY_WORD) {
 
 		(*curr_lex)++;
 		Skip_lexemes(lexeme_array, curr_lex);
@@ -352,7 +352,7 @@ Node* Get_if(Lexeme_array* lexeme_array, int64_t* curr_lex, int* offset, Func_da
 	Skip_lexemes(lexeme_array, &curr_lex_copy);
 	memcpy(&tmp_data, &lexeme_array->lex_arr[curr_lex_copy].root->node_data, sizeof(Node_data*));
 
-	if(tmp_data->value == NO && tmp_data->expression_type == KEY_WORD) {
+	if (tmp_data->value == NO && tmp_data->expression_type == KEY_WORD) {
 
 		*curr_lex = curr_lex_copy + 1;
 		Skip_lexemes(lexeme_array, curr_lex);
@@ -381,7 +381,7 @@ Node* Get_while(Lexeme_array* lexeme_array, int64_t* curr_lex, int* offset,
 	Node_data* tmp_data = NULL;
 	memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
 
-	if(tmp_data->value != COLON || tmp_data->expression_type != SPECIAL_SYMBOL)
+	if (tmp_data->value != COLON || tmp_data->expression_type != SPECIAL_SYMBOL)
 		SYNTAX_ERROR(lexeme_array, curr_lex);
 
 	(*curr_lex)++;
@@ -407,10 +407,10 @@ Node* Get_condition(Lexeme_array* lexeme_array, int64_t* curr_lex, Func_data_lis
 
 	Node_data* tmp_data1 = NULL, * tmp_data2 = NULL;
 	int64_t old_pos = 0;
-	if(lexeme_array->lex_arr[*curr_lex].root) {
+	if (lexeme_array->lex_arr[*curr_lex].root) {
 
 		memcpy(&tmp_data1, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
-		if(lexeme_array->lex_arr[*curr_lex + 1].root)
+		if (lexeme_array->lex_arr[*curr_lex + 1].root)
 			memcpy(&tmp_data2, &lexeme_array->lex_arr[*curr_lex + 1].root->node_data, sizeof(Node_data*));
 
 		free(lexeme_array->lex_arr[*curr_lex].root);
@@ -429,9 +429,9 @@ Node* Get_condition(Lexeme_array* lexeme_array, int64_t* curr_lex, Func_data_lis
 
 Node* Get_comparison(Node_data* node_data1, Node_data* node_data2, int64_t* curr_lex) {
 
-	if(node_data1->value == ANGLE_BRACKET_OP) {
+	if (node_data1->value == ANGLE_BRACKET_OP) {
 
-		if(node_data2->value == ASSIGNMENT) {
+		if (node_data2->value == ASSIGNMENT) {
 
 			(*curr_lex) += 2;
 			return Lang_new_node(CONDITION, &LESS_OR_EQUAL, sizeof(int64_t), NULL, NULL);
@@ -444,9 +444,9 @@ Node* Get_comparison(Node_data* node_data1, Node_data* node_data2, int64_t* curr
 		}
 	}
 
-	else if(node_data1->value == ANGLE_BRACKET_CL) {
+	else if (node_data1->value == ANGLE_BRACKET_CL) {
 
-		if(node_data2->value == ASSIGNMENT) {
+		if (node_data2->value == ASSIGNMENT) {
 
 			(*curr_lex) += 2;
 			return Lang_new_node(CONDITION, &GREATER_OR_EQUAL, sizeof(int64_t), NULL, NULL);
@@ -459,13 +459,13 @@ Node* Get_comparison(Node_data* node_data1, Node_data* node_data2, int64_t* curr
 		}
 	}
 
-	else if(node_data1->value == ASSIGNMENT) {
+	else if (node_data1->value == ASSIGNMENT) {
 
 		(*curr_lex)++;
 		return Lang_new_node(CONDITION, &EQUAL, sizeof(int64_t), NULL, NULL);
 	}
 
-	else if(node_data1->value == EX_MARK) {
+	else if (node_data1->value == EX_MARK) {
 
 		(*curr_lex) += 2;
 		return Lang_new_node(CONDITION, &NOT_EQUAL, sizeof(int64_t), NULL, NULL);
@@ -481,7 +481,7 @@ Node* Get_user_function_def(Lexeme_array* lexeme_array, int64_t* curr_lex, int* 
 	Node_data* tmp_data = NULL, * bracket_node = NULL;
 	memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
 
-	if(tmp_data->expression_type != FUNCTION)
+	if (tmp_data->expression_type != FUNCTION)
 		SYNTAX_ERROR(lexeme_array, curr_lex);
 
 	memcpy(&func_list->func_data[func_list->free_element].function, &tmp_data->value,
@@ -491,36 +491,36 @@ Node* Get_user_function_def(Lexeme_array* lexeme_array, int64_t* curr_lex, int* 
 	Skip_lexemes(lexeme_array, curr_lex);
 
 	memcpy(&bracket_node, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
-	if(bracket_node->value != PARENTHESES_OP || bracket_node->expression_type != SPECIAL_SYMBOL)
+	if (bracket_node->value != PARENTHESES_OP || bracket_node->expression_type != SPECIAL_SYMBOL)
 		SYNTAX_ERROR(lexeme_array, curr_lex);
 
 	(*curr_lex)++;
 	memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
 
-	if(tmp_data->expression_type != SPECIAL_SYMBOL &&
+	if (tmp_data->expression_type != SPECIAL_SYMBOL &&
 	   tmp_data->value != PARENTHESES_CL) {
 
 			func_list->func_data[func_list->free_element].func_memory = 0;
-			if(!Var_list_ctor(&func_list->func_data[func_list->free_element].parameters, Var_list_init_size))
+			if (!Var_list_ctor(&func_list->func_data[func_list->free_element].parameters, Var_list_init_size))
 				return NULL;
 
 			root->left_node = Get_def_parameters(lexeme_array, curr_lex, func_list);
 
 		memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
-		if(tmp_data->expression_type != SPECIAL_SYMBOL || tmp_data->value != PARENTHESES_CL)
+		if (tmp_data->expression_type != SPECIAL_SYMBOL || tmp_data->value != PARENTHESES_CL)
 		   SYNTAX_ERROR(lexeme_array, curr_lex);
 	}
 
 	(*curr_lex)++;
 	memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
 
-	if(tmp_data->value != NEW_LINE || tmp_data->expression_type != SPECIAL_SYMBOL)
+	if (tmp_data->value != NEW_LINE || tmp_data->expression_type != SPECIAL_SYMBOL)
 	   SYNTAX_ERROR(lexeme_array, curr_lex);
 
 	(*curr_lex)++;
 	Skip_lexemes(lexeme_array, curr_lex);
 
-	if(!Var_list_ctor(&func_list->func_data[func_list->free_element].local_vars, Var_list_init_size))
+	if (!Var_list_ctor(&func_list->func_data[func_list->free_element].local_vars, Var_list_init_size))
 		return NULL;
 
 	root->right_node = Get_operation(lexeme_array, curr_lex, offset, func_list);
@@ -528,7 +528,7 @@ Node* Get_user_function_def(Lexeme_array* lexeme_array, int64_t* curr_lex, int* 
 	Skip_lexemes(lexeme_array, curr_lex);
 	memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
 
-	if(tmp_data->value != ANGLE_BRACKET_CL || tmp_data->expression_type != SPECIAL_SYMBOL)
+	if (tmp_data->value != ANGLE_BRACKET_CL || tmp_data->expression_type != SPECIAL_SYMBOL)
 		SYNTAX_ERROR(lexeme_array, curr_lex);
 
 	(*curr_lex)++;
@@ -543,7 +543,7 @@ Node* Get_user_function(Lexeme_array* lexeme_array, int64_t* curr_lex, Func_data
 	Node_data* tmp_data = NULL, * bracket_node = NULL;
 	memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
 
-	if(tmp_data->expression_type != FUNCTION)
+	if (tmp_data->expression_type != FUNCTION)
 		SYNTAX_ERROR(lexeme_array, curr_lex);
 
 	Node* root = lexeme_array->lex_arr[*curr_lex].root;
@@ -552,21 +552,21 @@ Node* Get_user_function(Lexeme_array* lexeme_array, int64_t* curr_lex, Func_data
 	Skip_lexemes(lexeme_array, curr_lex);
 
 	memcpy(&bracket_node, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
-	if(bracket_node->value != PARENTHESES_OP || bracket_node->expression_type != SPECIAL_SYMBOL)
+	if (bracket_node->value != PARENTHESES_OP || bracket_node->expression_type != SPECIAL_SYMBOL)
 		SYNTAX_ERROR(lexeme_array, curr_lex);
 
 	(*curr_lex)++;
 
 	memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
 
-	if(tmp_data->expression_type != SPECIAL_SYMBOL &&
+	if (tmp_data->expression_type != SPECIAL_SYMBOL &&
 	   tmp_data->value != PARENTHESES_CL) {
 
 		root->left_node = Get_parameters(lexeme_array, curr_lex, func_list);
 
 		memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
 
-		if(tmp_data->expression_type != SPECIAL_SYMBOL ||
+		if (tmp_data->expression_type != SPECIAL_SYMBOL ||
 		   tmp_data->value != PARENTHESES_CL)
 		   SYNTAX_ERROR(lexeme_array, curr_lex);
 	}
@@ -581,7 +581,7 @@ Node* Get_def_parameters(Lexeme_array* lexeme_array, int64_t* curr_lex, Func_dat
 	Node_data* tmp_data = NULL;
 	Node* root = lexeme_array->lex_arr[*curr_lex].root;
 	memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
-	if(tmp_data->expression_type != VAR)
+	if (tmp_data->expression_type != VAR)
 		SYNTAX_ERROR(lexeme_array, curr_lex);
 
 	Variable_data* var_data = NULL;
@@ -592,14 +592,14 @@ Node* Get_def_parameters(Lexeme_array* lexeme_array, int64_t* curr_lex, Func_dat
 	(*curr_lex)++;
 	memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
 
-	while(tmp_data->value == COMMA && tmp_data->expression_type == SPECIAL_SYMBOL) {
+	while (tmp_data->value == COMMA && tmp_data->expression_type == SPECIAL_SYMBOL) {
 
 		Node* connector = lexeme_array->lex_arr[*curr_lex].root;
 		connector->right_node = root;
 		(*curr_lex)++;
 		memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
 
-		if(tmp_data->expression_type != VAR)
+		if (tmp_data->expression_type != VAR)
 			SYNTAX_ERROR(lexeme_array, curr_lex);
 
 		INSERT_PARAMETER
@@ -619,7 +619,7 @@ Node* Get_parameters(Lexeme_array* lexeme_array, int64_t* curr_lex, Func_data_li
 	Node* root = Get_addition_priority(lexeme_array, curr_lex, func_list);
 	memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
 
-	while(tmp_data->value == COMMA && tmp_data->expression_type == SPECIAL_SYMBOL) {
+	while (tmp_data->value == COMMA && tmp_data->expression_type == SPECIAL_SYMBOL) {
 
 		Node* connector = lexeme_array->lex_arr[*curr_lex].root;
 
@@ -642,29 +642,29 @@ Node* Get_operation(Lexeme_array* lexeme_array, int64_t* curr_lex, int* offset,
 	Node_data* tmp_data = NULL;
 	memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
 
-	if(tmp_data->value == IF && tmp_data->expression_type == KEY_WORD) {
+	if (tmp_data->value == IF && tmp_data->expression_type == KEY_WORD) {
 
 		root = Get_if(lexeme_array, curr_lex, offset, func_list);
 	}
 
-	else if(tmp_data->value == WHILE && tmp_data->expression_type == KEY_WORD) {
+	else if (tmp_data->value == WHILE && tmp_data->expression_type == KEY_WORD) {
 
 		root = Get_while(lexeme_array, curr_lex, offset, func_list);
 	}
 
-	else if(tmp_data->expression_type == VAR) {
+	else if (tmp_data->expression_type == VAR) {
 
 		INSERT_LOC_VAR
 
 		root = Get_assignment(lexeme_array, curr_lex, func_list);
 	}
 
-	else if(tmp_data->expression_type == FUNCTION) {
+	else if (tmp_data->expression_type == FUNCTION) {
 
 		root = Get_user_function(lexeme_array, curr_lex, func_list);
 	}
 
-	else if(tmp_data->value == RETURN && tmp_data->expression_type == KEY_WORD) {
+	else if (tmp_data->value == RETURN && tmp_data->expression_type == KEY_WORD) {
 
 		int64_t curr_lex_copy = *curr_lex;
 		(*curr_lex)++;
@@ -674,13 +674,13 @@ Node* Get_operation(Lexeme_array* lexeme_array, int64_t* curr_lex, int* offset,
 		root = lexeme_array->lex_arr[curr_lex_copy].root;
 	}
 
-	if(!root) {
+	if (!root) {
 
 		DEBUG_PRINTF("ERROR: root null ptr\n");
 		return NULL;
 	}
 
-	while(!Exit_operator(lexeme_array, curr_lex, offset)) {
+	while (!Exit_operator(lexeme_array, curr_lex, offset)) {
 
 		Skip_lexemes(lexeme_array, curr_lex);
 		memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
@@ -703,7 +703,7 @@ Node* Get_assignment(Lexeme_array* lexeme_array, int64_t* curr_lex, Func_data_li
 	Node_data* tmp_data = NULL;
 	memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
 
-	if(tmp_data->value != ASSIGNMENT || tmp_data->expression_type != SPECIAL_SYMBOL)
+	if (tmp_data->value != ASSIGNMENT || tmp_data->expression_type != SPECIAL_SYMBOL)
 		SYNTAX_ERROR(lexeme_array, curr_lex);
 
 	Node* assignment_node = lexeme_array->lex_arr[*curr_lex].root;
@@ -723,24 +723,24 @@ bool Exit_operator(Lexeme_array* lexeme_array, int64_t* curr_lex, int* offset) {
 	int tabs_amount = 0;
 	memcpy(&tmp_data, &lexeme_array->lex_arr[curr_lex_copy].root->node_data, sizeof(Node_data*));
 
-	while(tmp_data->expression_type == SPECIAL_SYMBOL &&
+	while (tmp_data->expression_type == SPECIAL_SYMBOL &&
 		 (tmp_data->value == TAB || tmp_data->value == NEW_LINE)) {
 
-		if(tmp_data->value == NEW_LINE)
+		if (tmp_data->value == NEW_LINE)
 			tabs_amount = 0;
 
 		else
 			tabs_amount++;
 
 		(curr_lex_copy)++;
-		if(curr_lex_copy < lexeme_array->size)
+		if (curr_lex_copy < lexeme_array->size)
 			memcpy(&tmp_data, &lexeme_array->lex_arr[curr_lex_copy].root->node_data, sizeof(Node_data*));
 
 		else
 			return true;
 	}
 
-	if(tabs_amount < *offset || tmp_data->expression_type == SPECIAL_SYMBOL &&
+	if (tabs_amount < *offset || tmp_data->expression_type == SPECIAL_SYMBOL &&
 								tmp_data->value == ANGLE_BRACKET_CL) {
 
 		return true;
@@ -752,10 +752,10 @@ bool Exit_operator(Lexeme_array* lexeme_array, int64_t* curr_lex, int* offset) {
 void Skip_lexemes(Lexeme_array* lexeme_array, int64_t* curr_lex) {
 
 	Node_data* tmp_data = NULL;
-	if(*curr_lex < lexeme_array->size)
+	if (*curr_lex < lexeme_array->size)
 		memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
 
-	while(*curr_lex + 1 < lexeme_array->size && tmp_data->expression_type == SPECIAL_SYMBOL &&
+	while (*curr_lex + 1 < lexeme_array->size && tmp_data->expression_type == SPECIAL_SYMBOL &&
 		 (tmp_data->value == TAB || tmp_data->value == NEW_LINE)) {
 
 		(*curr_lex)++;
@@ -770,7 +770,7 @@ Node* Get_addition_priority(Lexeme_array* lexeme_array, int64_t* curr_lex, Func_
 	Node_data* tmp_data = NULL;
 	memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
 
-	while(tmp_data->expression_type == OP &&
+	while (tmp_data->expression_type == OP &&
 		 (tmp_data->value == ADD || tmp_data->value == SUB)) {
 
 		Node* operation = lexeme_array->lex_arr[*curr_lex].root;
@@ -796,7 +796,7 @@ Node* Get_multiplication_priority(Lexeme_array* lexeme_array, int64_t* curr_lex,
 	Node_data* tmp_data = NULL;
 	memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
 
-	while(tmp_data->expression_type == OP &&
+	while (tmp_data->expression_type == OP &&
 		 (tmp_data->value == MUL || tmp_data->value == DIV)) {
 
 		Node* operation = lexeme_array->lex_arr[*curr_lex].root;
@@ -821,7 +821,7 @@ Node* Get_power_priority(Lexeme_array* lexeme_array, int64_t* curr_lex, Func_dat
 	Node_data* tmp_data = NULL;
 	memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
 
-	while(tmp_data->expression_type == OP && tmp_data->value == POW) {
+	while (tmp_data->expression_type == OP && tmp_data->value == POW) {
 
 		Node* operation = lexeme_array->lex_arr[*curr_lex].root;
 		operation->left_node = root;
@@ -843,14 +843,14 @@ Node* Get_first_priority(Lexeme_array* lexeme_array, int64_t* curr_lex, Func_dat
 	Node_data* tmp_data = NULL;
 	memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
 
-	if(tmp_data->value == PARENTHESES_OP && tmp_data->expression_type == SPECIAL_SYMBOL) {
+	if (tmp_data->value == PARENTHESES_OP && tmp_data->expression_type == SPECIAL_SYMBOL) {
 
 		(*curr_lex)++;
 
 		Node* root = Get_addition_priority(lexeme_array, curr_lex, func_list);
 
 		memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
-		if(tmp_data->value != PARENTHESES_CL || tmp_data->expression_type != SPECIAL_SYMBOL)
+		if (tmp_data->value != PARENTHESES_CL || tmp_data->expression_type != SPECIAL_SYMBOL)
 			SYNTAX_ERROR(lexeme_array, curr_lex);
 
 		(*curr_lex)++;
@@ -858,27 +858,27 @@ Node* Get_first_priority(Lexeme_array* lexeme_array, int64_t* curr_lex, Func_dat
 		return root;
 	}
 
-	else if(tmp_data->expression_type == NUM) {      // Get_Num
+	else if (tmp_data->expression_type == NUM) {      // Get_Num
 
 		(*curr_lex)++;
 		return lexeme_array->lex_arr[*curr_lex - 1].root;
 	}
 
-	else if(tmp_data->expression_type == OP) { // Get_Func
+	else if (tmp_data->expression_type == OP) { // Get_Func
 
-		if(tmp_data->value == SUB) {
+		if (tmp_data->value == SUB) {
 
 			Node_data* tmp_data1 = NULL;
 			memcpy(&tmp_data1, &lexeme_array->lex_arr[*curr_lex-1].root->node_data, sizeof(Node_data*));
 
-			if(tmp_data1->expression_type == CONDITION ||
+			if (tmp_data1->expression_type == CONDITION ||
 			   tmp_data1->expression_type == KEY_WORD  ||
 			   tmp_data1->expression_type == SPECIAL_SYMBOL &&
 			  (tmp_data1->value == ASSIGNMENT || tmp_data1->value == PARENTHESES_OP)) {
 
 				memcpy(&tmp_data1, &lexeme_array->lex_arr[*curr_lex+1].root->node_data, sizeof(Node_data*));
 
-				if(tmp_data1->expression_type == NUM) {
+				if (tmp_data1->expression_type == NUM) {
 
 					double tmp_double = 0;
 					memcpy(&tmp_double, &tmp_data1->value, sizeof(double));
@@ -912,14 +912,14 @@ Node* Get_first_priority(Lexeme_array* lexeme_array, int64_t* curr_lex, Func_dat
 			return Get_function(lexeme_array, curr_lex, func_list);
 	}
 
-	else if(tmp_data->expression_type == FUNCTION)
+	else if (tmp_data->expression_type == FUNCTION)
 		return Get_user_function(lexeme_array, curr_lex, func_list);
 
-	else if(tmp_data->expression_type == VAR) { // Get_Id
+	else if (tmp_data->expression_type == VAR) { // Get_Id
 
 		Node_data* tmp_data2 = NULL;
 		memcpy(&tmp_data2, &lexeme_array->lex_arr[*curr_lex+1].root->node_data, sizeof(Node_data*));
-		if(tmp_data2->expression_type == PARENTHESES_OP)
+		if (tmp_data2->expression_type == PARENTHESES_OP)
 			tmp_data->expression_type = FUNCTION;
 
 		else {
@@ -950,36 +950,36 @@ Node* Get_function(Lexeme_array* lexeme_array, int64_t* curr_lex, Func_data_list
 	Node_data* tmp_data = NULL;
 	memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
 
-	if(tmp_data->value == LOG) {
+	if (tmp_data->value == LOG) {
 
 		int64_t func_index = (*curr_lex);
 		(*curr_lex)++;
 		memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
 
-		if(tmp_data->value != PARENTHESES_OP || tmp_data->expression_type != SPECIAL_SYMBOL)
+		if (tmp_data->value != PARENTHESES_OP || tmp_data->expression_type != SPECIAL_SYMBOL)
 			SYNTAX_ERROR(lexeme_array, curr_lex);
 
 		(*curr_lex)++;
 
 		Node* left_node = Get_addition_priority(lexeme_array, curr_lex, func_list);
 
-		if(!left_node)
+		if (!left_node)
 			SYNTAX_ERROR(lexeme_array, curr_lex);
 
 		memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
 
-		if(tmp_data->value != COMMA || tmp_data->expression_type != SPECIAL_SYMBOL)
+		if (tmp_data->value != COMMA || tmp_data->expression_type != SPECIAL_SYMBOL)
 			SYNTAX_ERROR(lexeme_array, curr_lex);
 
 		(*curr_lex)++;
 		Node* right_node = Get_addition_priority(lexeme_array, curr_lex, func_list);
 
-		if(!right_node)
+		if (!right_node)
 			SYNTAX_ERROR(lexeme_array, curr_lex);
 
 		memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
 
-		if(tmp_data->value != PARENTHESES_CL || tmp_data->expression_type != SPECIAL_SYMBOL)
+		if (tmp_data->value != PARENTHESES_CL || tmp_data->expression_type != SPECIAL_SYMBOL)
 			SYNTAX_ERROR(lexeme_array, curr_lex);
 
 		(*curr_lex)++;
@@ -997,18 +997,18 @@ Node* Get_function(Lexeme_array* lexeme_array, int64_t* curr_lex, Func_data_list
 
 		memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
 
-		if(tmp_data->value != PARENTHESES_OP || tmp_data->expression_type != SPECIAL_SYMBOL)
+		if (tmp_data->value != PARENTHESES_OP || tmp_data->expression_type != SPECIAL_SYMBOL)
 			SYNTAX_ERROR(lexeme_array, curr_lex);
 
 		(*curr_lex)++;
 		Node* left_node = Get_addition_priority(lexeme_array, curr_lex, func_list);
 
-		if(!left_node)
+		if (!left_node)
 			SYNTAX_ERROR(lexeme_array, curr_lex);
 
 		memcpy(&tmp_data, &lexeme_array->lex_arr[*curr_lex].root->node_data, sizeof(Node_data*));
 
-		if(tmp_data->value != PARENTHESES_CL || tmp_data->expression_type != SPECIAL_SYMBOL)
+		if (tmp_data->value != PARENTHESES_CL || tmp_data->expression_type != SPECIAL_SYMBOL)
 			SYNTAX_ERROR(lexeme_array, curr_lex);
 
 		(*curr_lex)++;
@@ -1028,21 +1028,21 @@ void Syntax_error(Lexeme_array* lexeme_array, int64_t* curr_lex, const char* fun
 	DEBUG_PRINTF("col: %d\n", lexeme_array->lex_arr[*curr_lex].col);
 	DEBUG_PRINTF("lexeme: ");
 
-	switch(tmp_node_data->expression_type) {
+	switch (tmp_node_data->expression_type) {
         case NUM: {
 
 			DEBUG_PRINTF("expression_type = %#X (NUM), \n", NUM);
             double tmp_double = 0;
             memcpy(&tmp_double, &tmp_node_data->value, sizeof(double));
 
-            if(fabs(tmp_double - M_PI) < Epsilon) {
+            if (fabs(tmp_double - M_PI) < Epsilon) {
 
                 DEBUG_PRINTF("value = pi");
 			}
 
             else {
 
-				if(fabs(tmp_double - M_E) < Epsilon) {
+				if (fabs(tmp_double - M_E) < Epsilon) {
 
                 	DEBUG_PRINTF("value = e");
 				}
@@ -1068,7 +1068,7 @@ void Syntax_error(Lexeme_array* lexeme_array, int64_t* curr_lex, const char* fun
             DEBUG_PRINTF("expression_type = %#X (OP), \n", OP);
             int64_t tmp_int = 0;
             memcpy(&tmp_int, &tmp_node_data->value, sizeof(int64_t));
-            switch(tmp_int) {
+            switch (tmp_int) {
 
                 #define FUNC(func_name, func_full_name) case func_name:\
                                                                DEBUG_PRINTF("value = %s ", func_full_name);\
@@ -1089,7 +1089,7 @@ void Syntax_error(Lexeme_array* lexeme_array, int64_t* curr_lex, const char* fun
                     DEBUG_PRINTF("ERROR: wrong expression value = %#X \n", tmp_int);
             }
             DEBUG_PRINTF("\n");
-            if(!tmp_int)
+            if (!tmp_int)
                 DEBUG_PRINTF("ERROR: wrong expression type (0 operation)\n");
 
             break;
@@ -1111,7 +1111,7 @@ void Syntax_error(Lexeme_array* lexeme_array, int64_t* curr_lex, const char* fun
             DEBUG_PRINTF("expression_type = %#X (CONDITION), \n", CONDITION);
             int64_t tmp_int = 0;
             memcpy(&tmp_int, &tmp_node_data->value, sizeof(int64_t));
-            switch(tmp_int) {
+            switch (tmp_int) {
 
                 #define CONDITION(value, symbol, spu_code) case value:\
                                                     DEBUG_PRINTF("value = %s ", symbol);\
@@ -1133,7 +1133,7 @@ void Syntax_error(Lexeme_array* lexeme_array, int64_t* curr_lex, const char* fun
             DEBUG_PRINTF("expression_type = %#X (SPECIAL_SYMBOL), \n", SPECIAL_SYMBOL);
             int64_t tmp_int = 0;
             memcpy(&tmp_int, &tmp_node_data->value, sizeof(int64_t));
-            switch(tmp_int) {
+            switch (tmp_int) {
 
                 #define SPECIAL_SYMBOL(value, symbol) case value:\
                                                           DEBUG_PRINTF("value = %c ", symbol);\
@@ -1155,7 +1155,7 @@ void Syntax_error(Lexeme_array* lexeme_array, int64_t* curr_lex, const char* fun
             DEBUG_PRINTF("expression_type = %#X (KEY_WORD), \n", KEY_WORD);
             int64_t tmp_int = 0;
             memcpy(&tmp_int, &tmp_node_data->value, sizeof(int64_t));
-            switch(tmp_int) {
+            switch (tmp_int) {
 
                 #define KEY_WORD(value, symbol) case value:\
                                                     DEBUG_PRINTF("value = %s ", symbol);\
@@ -1189,14 +1189,14 @@ void Syntax_error(Lexeme_array* lexeme_array, int64_t* curr_lex, const char* fun
 bool Lang_get_next_symbol(const char* node_data, uint64_t data_size,
 						  int64_t* curr_pos, int64_t* line, int64_t* col) {
 
-	while(*curr_pos < data_size && node_data[*curr_pos] != '\n' &&
+	while (*curr_pos < data_size && node_data[*curr_pos] != '\n' &&
 		  node_data[*curr_pos] != '\t' && isspace(node_data[*curr_pos])) {
 
 		(*col)++;
 		(*curr_pos)++;
 	}
 
-	if((*curr_pos) >= data_size)
+	if ((*curr_pos) >= data_size)
 		return false;
 
 	return true;

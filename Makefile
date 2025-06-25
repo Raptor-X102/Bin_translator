@@ -77,7 +77,7 @@ nasm:
 	$(CXX) -O0 First_exe.obj -o First_exe_nasm
 
 compile_all:
-	./build/RXcc.exe -s Programminng_language/other/Input_data/Solve_quad_eq.txt -a First_exe.asm -d Programminng_language/other/Debug/Lang_debug.dot -o First_exe -Ma Programminng_language/other/asm_files/My_asm1.asm
+	./build/RXcc.exe -s Programminng_language/other/Input_data/Code_example1.txt -a First_exe.asm -d Programminng_language/other/Debug/Lang_debug.dot -o First_exe -Ma Programminng_language/other/asm_files/My_asm1.asm
 
 compile_my_asm:
 	./build/RXcc.exe -s Programminng_language/other/Input_data/Code_example.txt -Ma Programminng_language/other/asm_files/My_asm1.asm -d Programminng_language/other/Debug/Lang_debug.dot

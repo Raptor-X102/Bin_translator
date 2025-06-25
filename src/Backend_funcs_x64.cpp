@@ -23,7 +23,7 @@ bool Compile_x64(const char* main_cpp_file,
     main.var_len = strlen(main.var_name);
     Variable_data* main_ptr = &main;
     int64_t index = Find_func_data(func_list, &main_ptr);
-    if(index == -1) {
+    if (index == -1) {
 
         DEBUG_PRINTF("ERROR: 'main' function was not found\n");
         return false;
@@ -37,7 +37,7 @@ bool Compile_x64(const char* main_cpp_file,
     Dynamic_array_push_back(&d_array_funcs, &index, sizeof(int32_t));
     JMP_REL32(&d_array_code, No_jmp_rel32);
 
-    if(!Compile_user_function_def_x64(&d_array_code, &d_array_funcs, root, func_list))
+    if (!Compile_user_function_def_x64(&d_array_code, &d_array_funcs, root, func_list))
         return false;
 
     Check_alignment_prologue_x64(&d_array_code, func_list, check_align_even_index,
@@ -48,7 +48,7 @@ bool Compile_x64(const char* main_cpp_file,
     size_t buffer_size = 0;
     std_funcs =  Create_main(main_cpp_file, modified_main_cpp_file, &exe_file_name, &file_buffer, &buffer_size,
                              d_array_code.size - Main_prologue_length - Main_epilogue_length);
-    if(!std_funcs)
+    if (!std_funcs)
         return false;
 
     Fill_jmp_call_addresses(&d_array_code, &d_array_funcs, func_list, std_funcs);
@@ -56,7 +56,7 @@ bool Compile_x64(const char* main_cpp_file,
     Memcpy_safe(file_buffer + std_funcs[Main_entry_index].rel_address, d_array_code.data, d_array_code.size);
 
     FILE* exe_output_file = fopen(exe_file_name, "wb");
-    if(!exe_output_file) {
+    if (!exe_output_file) {
 
         DEBUG_PRINTF("ERROR: file was not opened\n");
         return false;
@@ -83,35 +83,35 @@ void Fill_jmp_call_addresses(Dynamic_array* d_array_code, Dynamic_array* d_array
         memcpy(&dst_address, &d_array_funcs->data[index], sizeof(int32_t));
         index += sizeof(uint32_t);
 
-        if(dst_address == Format_string_sf_addr_index) {
+        if (dst_address == Format_string_sf_addr_index) {
 
             dst_address = std_funcs[Format_string_sf_index].rel_address -
                           address_of_jmp_call - Rel32_code_size;
             memcpy(&d_array_code->data[address_of_jmp_call], &dst_address, sizeof(int32_t));
         }
 
-        else if(dst_address == Format_string_pf_addr_index) {
+        else if (dst_address == Format_string_pf_addr_index) {
 
             dst_address = std_funcs[Format_string_pf_index].rel_address -
                           address_of_jmp_call - Rel32_code_size;
             memcpy(&d_array_code->data[address_of_jmp_call], &dst_address, sizeof(int32_t));
         }
 
-        else if(dst_address == Scanf_func_index) {
+        else if (dst_address == Scanf_func_index) {
 
             dst_address = std_funcs[Scanf_index].rel_address -
                           address_of_jmp_call - Rel32_code_size;
             memcpy(&d_array_code->data[address_of_jmp_call], &dst_address, sizeof(int32_t));
         }
 
-        else if(dst_address == Printf_func_index) {
+        else if (dst_address == Printf_func_index) {
 
             dst_address = std_funcs[Printf_index].rel_address -
                           address_of_jmp_call - Rel32_code_size;
             memcpy(&d_array_code->data[address_of_jmp_call], &dst_address, sizeof(int32_t));
         }
 
-        else if(dst_address < 0) {
+        else if (dst_address < 0) {
 
             dst_address = -dst_address - address_of_jmp_call - Rel32_code_size;
             memcpy(&d_array_code->data[address_of_jmp_call], &dst_address, sizeof(int32_t));
@@ -129,19 +129,20 @@ void Fill_jmp_call_addresses(Dynamic_array* d_array_code, Dynamic_array* d_array
 void Check_alignment_prologue_x64(Dynamic_array* d_array_code, Func_data_list* func_list,
                               int64_t check_align_even_index, int64_t check_align_odd_index) {
 
-    int alignment = 0x0F;
+    int alignment = 0x8;
+    int mask = 0x0F;
 
-    INSERT_NOPS(d_array_code, d_array_code->size % 16);
+    INSERT_NOPS(d_array_code, Code_alignment - (d_array_code->size % Code_alignment));
     func_list->func_data[check_align_even_index].func_rel32_address = d_array_code->size;
     MOV_REG_REG(d_array_code, I_RBX, I_RSP);
-    AND_REG_IMM(d_array_code, I_RBX, alignment);
+    XOR_REG_IMM(d_array_code, I_RBX, alignment);
+    AND_REG_IMM(d_array_code, I_RBX, mask);
     RET(d_array_code);
 
-    INSERT_NOPS(d_array_code, d_array_code->size % 16);
+    INSERT_NOPS(d_array_code, Code_alignment - (d_array_code->size % Code_alignment));
     func_list->func_data[check_align_odd_index].func_rel32_address = d_array_code->size;
     MOV_REG_REG(d_array_code, I_RBX, I_RSP);
-    NEG_REG(d_array_code, I_RBX);
-    AND_REG_IMM(d_array_code, I_RBX, alignment);
+    AND_REG_IMM(d_array_code, I_RBX, mask);
     RET(d_array_code);
 }
 
@@ -150,27 +151,28 @@ bool Compile_user_function_def_x64(Dynamic_array* d_array_code, Dynamic_array* d
 
     Node_data* tmp_data = NULL;
     memcpy(&tmp_data, &root->node_data, sizeof(Node_data*));
-    if(tmp_data->value == ANGLE_BRACKET_CL && tmp_data->expression_type == SPECIAL_SYMBOL) {
+    if (tmp_data->value == ANGLE_BRACKET_CL && tmp_data->expression_type == SPECIAL_SYMBOL) {
 
-        if(root->left_node)
-            if(!Compile_user_function_def_x64(d_array_code, d_array_funcs, root->left_node, func_list))
+        if (root->left_node)
+            if (!Compile_user_function_def_x64(d_array_code, d_array_funcs, root->left_node, func_list))
                 return false;
 
-        if(root->right_node)
-            if(!Compile_user_function_def_x64(d_array_code, d_array_funcs, root->right_node, func_list))
+        if (root->right_node)
+            if (!Compile_user_function_def_x64(d_array_code, d_array_funcs, root->right_node, func_list))
                return false;
     }
 
     else {
 
         int64_t index = Find_func_data(func_list, &tmp_data->value);
-        if(index == -1) {
+        if (index == -1) {
 
             DEBUG_PRINTF("ERROR: this function was not inserted in func_data");
             return false;
         }
 
-        INSERT_NOPS(d_array_code, d_array_code->size % 16);
+
+        INSERT_NOPS(d_array_code, Code_alignment - (d_array_code->size % Code_alignment));
 
         func_list->func_data[index].func_rel32_address = d_array_code->size;
         int32_t stack_frame = (func_list->func_data[index].local_vars.var_list_size +
@@ -179,7 +181,7 @@ bool Compile_user_function_def_x64(Dynamic_array* d_array_code, Dynamic_array* d
         MOV_REG_REG(d_array_code, I_RBP, I_RSP);
         SUB_REG_IMM(d_array_code, I_RSP, stack_frame);
 
-        if(!Compile_operation_x64(d_array_code, d_array_funcs, root->right_node, func_list, index))
+        if (!Compile_operation_x64(d_array_code, d_array_funcs, root->right_node, func_list, index))
             return false;
     }
 
@@ -191,49 +193,49 @@ bool Compile_operation_x64(Dynamic_array* d_array_code, Dynamic_array* d_array_f
 
     Node_data* tmp_data = NULL;
     memcpy(&tmp_data, &root->node_data, sizeof(Node_data*));
-    if(tmp_data->value == TAB && tmp_data->expression_type == SPECIAL_SYMBOL) {
+    if (tmp_data->value == TAB && tmp_data->expression_type == SPECIAL_SYMBOL) {
 
-        if(root->left_node) {
+        if (root->left_node) {
 
-            if(!Compile_operation_x64(d_array_code, d_array_funcs, root->left_node, func_list, index))
+            if (!Compile_operation_x64(d_array_code, d_array_funcs, root->left_node, func_list, index))
                 return false;
         }
-        if(root->right_node) {
+        if (root->right_node) {
 
-            if(!Compile_operation_x64(d_array_code, d_array_funcs, root->right_node, func_list, index))
+            if (!Compile_operation_x64(d_array_code, d_array_funcs, root->right_node, func_list, index))
                 return false;
         }
     }
 
     else {
 
-        if(tmp_data->value == IF && tmp_data->expression_type == KEY_WORD) {
+        if (tmp_data->value == IF && tmp_data->expression_type == KEY_WORD) {
 
-            if(!Compile_if_x64(d_array_code, d_array_funcs, root, func_list, index))
+            if (!Compile_if_x64(d_array_code, d_array_funcs, root, func_list, index))
                 return false;
         }
 
-        else if(tmp_data->value == WHILE && tmp_data->expression_type == KEY_WORD) {
+        else if (tmp_data->value == WHILE && tmp_data->expression_type == KEY_WORD) {
 
-            if(!Compile_while_x64(d_array_code, d_array_funcs, root, func_list, index))
+            if (!Compile_while_x64(d_array_code, d_array_funcs, root, func_list, index))
                 return false;
         }
 
-        else if(tmp_data->value == ASSIGNMENT && tmp_data->expression_type == SPECIAL_SYMBOL) {
+        else if (tmp_data->value == ASSIGNMENT && tmp_data->expression_type == SPECIAL_SYMBOL) {
 
-            if(!Compile_assignment_x64(d_array_code, d_array_funcs, root, func_list, index))
+            if (!Compile_assignment_x64(d_array_code, d_array_funcs, root, func_list, index))
                 return false;
         }
 
-        else if(tmp_data->expression_type == FUNCTION) {
+        else if (tmp_data->expression_type == FUNCTION) {
 
-            if(!Compile_user_function_x64(d_array_code, d_array_funcs, root, func_list, index))
+            if (!Compile_user_function_x64(d_array_code, d_array_funcs, root, func_list, index))
                 return false;
         }
 
-        else if(tmp_data->value == RETURN && tmp_data->expression_type == KEY_WORD) {
+        else if (tmp_data->value == RETURN && tmp_data->expression_type == KEY_WORD) {
 
-            if(!Compile_return_x64(d_array_code, d_array_funcs, root, func_list, index))
+            if (!Compile_return_x64(d_array_code, d_array_funcs, root, func_list, index))
                 return false;
         }
 
@@ -253,11 +255,11 @@ bool Compile_while_x64(Dynamic_array* d_array_code, Dynamic_array* d_array_funcs
     int32_t cond_jump_address = -d_array_code->size;
     uint32_t end_loop_jump_index = Compile_condition_x64(d_array_code, d_array_funcs, root->left_node, func_list,
                                                          index, Direct_option);
-    if(end_loop_jump_index == Error_value)
+    if (end_loop_jump_index == Error_value)
         return false;
 
-    if(root->right_node)
-        if(!Compile_operation_x64(d_array_code, d_array_funcs, root->right_node, func_list, index))
+    if (root->right_node)
+        if (!Compile_operation_x64(d_array_code, d_array_funcs, root->right_node, func_list, index))
             return false;
 
     uint32_t fill_address = d_array_code->size + 1; // before we put jmp instr, + 1 jmp byte
@@ -280,14 +282,14 @@ bool Compile_if_x64(Dynamic_array* d_array_code, Dynamic_array* d_array_funcs, N
     int32_t fill_jmp_disp = 0;
     uint32_t cond_jump_index = Compile_condition_x64(d_array_code, d_array_funcs, condition_root, func_list,
                                                      index, Direct_option);
-    if(cond_jump_index == Error_value)
+    if (cond_jump_index == Error_value)
         return false;
 
-    if(body_node->left_node)
-        if(!Compile_operation_x64(d_array_code, d_array_funcs, body_node->left_node, func_list, index))
+    if (body_node->left_node)
+        if (!Compile_operation_x64(d_array_code, d_array_funcs, body_node->left_node, func_list, index))
             return false;
 
-    if(body_node->right_node) {
+    if (body_node->right_node) {           // optimization to avoid jump on the next command
 
         fill_address = d_array_code->size + 1; // before we put jmp instr, + 1 jmp byte
         Dynamic_array_push_back(d_array_funcs, &fill_address, sizeof(uint32_t));
@@ -299,8 +301,8 @@ bool Compile_if_x64(Dynamic_array* d_array_code, Dynamic_array* d_array_funcs, N
     memcpy(d_array_funcs->data + cond_jump_index, &fill_jmp_disp, sizeof(uint32_t));
     cond_jump_index = d_array_funcs->size - sizeof(int32_t);
 
-    if(body_node->right_node) {
-        if(!Compile_operation_x64(d_array_code, d_array_funcs, body_node->right_node, func_list, index))
+    if (body_node->right_node) {
+        if (!Compile_operation_x64(d_array_code, d_array_funcs, body_node->right_node, func_list, index))
             return false;
 
         fill_jmp_disp = -d_array_code->size;
@@ -313,12 +315,12 @@ bool Compile_if_x64(Dynamic_array* d_array_code, Dynamic_array* d_array_funcs, N
 uint32_t Compile_condition_x64(Dynamic_array* d_array_code, Dynamic_array* d_array_funcs,
                                Node* root, Func_data_list* func_list, int64_t index, int option) {
 
-    if(root->left_node)
-        if(!Compile_operator_x64(d_array_code, d_array_funcs, root->left_node, func_list, index))
+    if (root->left_node)
+        if (!Compile_operator_x64(d_array_code, d_array_funcs, root->left_node, func_list, index))
             return Error_value;
 
-    if(root->right_node)
-        if(!Compile_operator_x64(d_array_code, d_array_funcs, root->right_node, func_list, index))
+    if (root->right_node)
+        if (!Compile_operator_x64(d_array_code, d_array_funcs, root->right_node, func_list, index))
             return Error_value;
 
     int32_t disp32 = 0, imm32 = Value_size;
@@ -334,9 +336,9 @@ uint32_t Compile_condition_x64(Dynamic_array* d_array_code, Dynamic_array* d_arr
                                         JXX##_REL8(d_array_code, Skip_5_bytes);\
                                         break;
 
-    if(option == Direct_option) {
+    if (option == Direct_option) {
 
-        switch(tmp_data->value) {
+        switch (tmp_data->value) {
 
             #include "Conditions_code_gen_x64.h"
 
@@ -348,7 +350,7 @@ uint32_t Compile_condition_x64(Dynamic_array* d_array_code, Dynamic_array* d_arr
 
     else {
 
-        switch(tmp_data->value) {
+        switch (tmp_data->value) {
 
             #include "Conditions_code_gen_reverse_x64.h"
 
@@ -370,8 +372,8 @@ uint32_t Compile_condition_x64(Dynamic_array* d_array_code, Dynamic_array* d_arr
 bool Compile_return_x64(Dynamic_array* d_array_code, Dynamic_array* d_array_funcs, Node* root, Func_data_list* func_list,
                         int64_t index) {
 
-    if(root->right_node)
-        if(!Compile_operator_x64(d_array_code, d_array_funcs, root->right_node, func_list, index))
+    if (root->right_node)
+        if (!Compile_operator_x64(d_array_code, d_array_funcs, root->right_node, func_list, index))
             return false;
 
     int32_t disp32 = 0, imm32 = Value_size;
@@ -400,12 +402,12 @@ bool Compile_assignment_x64(Dynamic_array* d_array_code, Dynamic_array* d_array_
     int64_t var_index = Find_variable(&func_list->func_data[index].local_vars,
                                       var_data->var_name, var_data->var_len);
 
-    if(var_index == -1) {
+    if (var_index == -1) {
 
         //int64_t loc_var_mem_index = func_list->func_data[index].parameters.free_var;
         var_index = Find_variable(&func_list->func_data[index].parameters,
                                   var_data->var_name, var_data->var_len);
-        if(var_index == -1) {
+        if (var_index == -1) {
 
             DEBUG_PRINTF("ERROR: variable '%.*s' was not found\n", var_data->var_len, var_data->var_name);
             return false;
@@ -430,20 +432,20 @@ bool Compile_operator_x64(Dynamic_array* d_array_code, Dynamic_array* d_array_fu
     int32_t disp32 = 0, imm32 = 0;
     memcpy(&tmp_data, &root->node_data, sizeof(Node_data*));
 
-    if(tmp_data->expression_type == OP) {
+    if (tmp_data->expression_type == OP) {
 
-        if(root->left_node)
-            if(!Compile_operator_x64(d_array_code, d_array_funcs, root->left_node, func_list, index))
+        if (root->left_node)
+            if (!Compile_operator_x64(d_array_code, d_array_funcs, root->left_node, func_list, index))
                 return false;
 
-        if(root->right_node)
-            if(!Compile_operator_x64(d_array_code, d_array_funcs, root->right_node, func_list, index))
+        if (root->right_node)
+            if (!Compile_operator_x64(d_array_code, d_array_funcs, root->right_node, func_list, index))
                 return false;
 
         disp32 = 0;
         imm32 = Value_size;
 
-        switch(tmp_data->value) {
+        switch (tmp_data->value) {
 
             #define FUNC_BIN(value, symbol) case value: {\
                                              MOVSD_XREG_MEM_DISP0(d_array_code, I_XMM0, I_RSP);\
@@ -483,18 +485,18 @@ bool Compile_operator_x64(Dynamic_array* d_array_code, Dynamic_array* d_array_fu
         MOVSD_MEM_XREG_DISP0(d_array_code, I_RSP, I_XMM1);
     }
 
-    else if(tmp_data->expression_type == VAR) {
+    else if (tmp_data->expression_type == VAR) {
 
         Variable_data* var_data = NULL;
         memcpy(&var_data, &tmp_data->value, sizeof(Variable_data*));
         int64_t var_index = Find_variable(&func_list->func_data[index].local_vars,
                                         var_data->var_name, var_data->var_len);
 
-        if(var_index == -1) {
+        if (var_index == -1) {
 
             var_index = Find_variable(&func_list->func_data[index].parameters,
                                     var_data->var_name, var_data->var_len);
-            if(var_index == -1) {
+            if (var_index == -1) {
 
                 DEBUG_PRINTF("ERROR: variable '%.*s' was not found\n", var_data->var_len, var_data->var_name);
                 return false;
@@ -511,7 +513,7 @@ bool Compile_operator_x64(Dynamic_array* d_array_code, Dynamic_array* d_array_fu
         }
     }
 
-    else if(tmp_data->expression_type == NUM) {
+    else if (tmp_data->expression_type == NUM) {
 
         double tmp_double = 0;
         memcpy(&tmp_double, &tmp_data->value, sizeof(double));
@@ -519,9 +521,9 @@ bool Compile_operator_x64(Dynamic_array* d_array_code, Dynamic_array* d_array_fu
         PUSH_REG(d_array_code, I_RDX);
     }
 
-    else if(tmp_data->expression_type == FUNCTION) {
+    else if (tmp_data->expression_type == FUNCTION) {
 
-        if(!Compile_user_function_x64(d_array_code, d_array_funcs, root, func_list, index))
+        if (!Compile_user_function_x64(d_array_code, d_array_funcs, root, func_list, index))
             return false;
     }
 
@@ -542,12 +544,12 @@ bool Compile_user_function_x64(Dynamic_array* d_array_code, Dynamic_array* d_arr
     Variable_data* var_data = NULL;
     memcpy(&var_data, &tmp_data->value, sizeof(Variable_data*));
 
-    if(!strncmp(var_data->var_name, "Out", var_data->var_len)) {      // TODO: make functions for 'Out' and 'In' insertion
+    if (!strncmp(var_data->var_name, "Out", var_data->var_len)) {      // TODO: make functions for 'Out' and 'In' insertion
 
         int32_t disp32 = 0, imm32 = 56;
         int parameters_pushed = 0;
         Compile_push_parameters_x64(d_array_code, d_array_funcs, root->left_node, func_list, index, &parameters_pushed);
-        if(parameters_pushed != 1) {
+        if (parameters_pushed != 1) {
 
             DEBUG_PRINTF("ERROR: in func 'Out' wrong arguments amount\n");
             return false;
@@ -576,7 +578,7 @@ bool Compile_user_function_x64(Dynamic_array* d_array_code, Dynamic_array* d_arr
         ADD_REG_IMM(d_array_code, I_RSP, imm32);
     }
 
-    else if(!strncmp(var_data->var_name, "In", var_data->var_len)) {        // TODO: make functions for 'Out' and 'In' insertion
+    else if (!strncmp(var_data->var_name, "In", var_data->var_len)) {        // TODO: make functions for 'Out' and 'In' insertion
 
         int32_t disp32 = 0, imm32 = 64;
         SUB_REG_IMM(d_array_code, I_RSP, imm32);
@@ -587,7 +589,7 @@ bool Compile_user_function_x64(Dynamic_array* d_array_code, Dynamic_array* d_arr
         LEA_REG_RIP_REL32(d_array_code, I_RCX, No_jmp_rel32);
 
         /*********Get parameter***********************************/
-        if(!root->left_node) {
+        if (!root->left_node) {
 
             DEBUG_PRINTF("ERROR: in func 'In' wrong arguments amount\n");
             return false;
@@ -599,11 +601,11 @@ bool Compile_user_function_x64(Dynamic_array* d_array_code, Dynamic_array* d_arr
         int64_t var_index = Find_variable(&func_list->func_data[index].local_vars,
                                         var_data->var_name, var_data->var_len);
 
-        if(var_index == -1) {
+        if (var_index == -1) {
 
             var_index = Find_variable(&func_list->func_data[index].parameters,
                                     var_data->var_name, var_data->var_len);
-            if(var_index == -1) {
+            if (var_index == -1) {
 
                 DEBUG_PRINTF("ERROR: variable '%.*s' was not found\n", var_data->var_len, var_data->var_name);
                 return false;
@@ -631,7 +633,7 @@ bool Compile_user_function_x64(Dynamic_array* d_array_code, Dynamic_array* d_arr
     else {
 
         int64_t callee_index = Find_func_data(func_list, &var_data);
-        if(callee_index == -1) {
+        if (callee_index == -1) {
 
             DEBUG_PRINTF("ERROR: '%.*s' function was not found\n", (size_t) var_data->var_len, var_data->var_name);
             return false;
@@ -639,7 +641,7 @@ bool Compile_user_function_x64(Dynamic_array* d_array_code, Dynamic_array* d_arr
 
         Variable_data check_alignment = {};
         int64_t parameters = (func_list->func_data[callee_index].parameters.free_var);
-        if(!(parameters % 2)) {
+        if (!(parameters % 2)) {
 
             check_alignment.var_name = strdup(Check_alignment_even);    // memleak, will be fixed later
             check_alignment.var_len = sizeof(Check_alignment_even) - 1;
@@ -653,7 +655,7 @@ bool Compile_user_function_x64(Dynamic_array* d_array_code, Dynamic_array* d_arr
 
         Variable_data* check_alignment_ptr = &check_alignment;
         int64_t check_alignment_index = Find_func_data(func_list, &check_alignment_ptr);
-        if(check_alignment_index == -1) {
+        if (check_alignment_index == -1) {
 
             DEBUG_PRINTF("ERROR: 'check_alignment_ptr' function was not found\n");
             return false;
@@ -675,7 +677,7 @@ bool Compile_user_function_x64(Dynamic_array* d_array_code, Dynamic_array* d_arr
 
         ADD_REG_REG(d_array_code, I_RSP, I_RBX);
 
-        if(Value_size*(parameters-1))
+        if (Value_size*(parameters-1))
             ADD_REG_IMM(d_array_code, I_RSP, Value_size*(parameters-1)); // need -1 to push into stack returning value
 
         int32_t disp32 = 0;
@@ -690,20 +692,20 @@ bool Compile_push_parameters_x64(Dynamic_array* d_array_code, Dynamic_array* d_a
 
     Node_data* tmp_data = NULL;
     memcpy(&tmp_data, &root->node_data, sizeof(Node_data*));
-    if(tmp_data->value == COMMA && tmp_data->expression_type == SPECIAL_SYMBOL) {
+    if (tmp_data->value == COMMA && tmp_data->expression_type == SPECIAL_SYMBOL) {
 
-        if(root->left_node)
-            if(!Compile_push_parameters_x64(d_array_code, d_array_funcs, root->left_node, func_list, index, parameters_pushed))
+        if (root->left_node)
+            if (!Compile_push_parameters_x64(d_array_code, d_array_funcs, root->left_node, func_list, index, parameters_pushed))
                 return false;
 
-        if(root->right_node)
-            if(!Compile_push_parameters_x64(d_array_code, d_array_funcs, root->right_node, func_list, index, parameters_pushed))
+        if (root->right_node)
+            if (!Compile_push_parameters_x64(d_array_code, d_array_funcs, root->right_node, func_list, index, parameters_pushed))
                 return false;
     }
 
     else {
 
-        if(!Compile_operator_x64(d_array_code, d_array_funcs, root, func_list, index))
+        if (!Compile_operator_x64(d_array_code, d_array_funcs, root, func_list, index))
             return false;
 
         *parameters_pushed += 1;

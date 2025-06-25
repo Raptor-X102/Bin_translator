@@ -25,7 +25,7 @@ enum Error_Code {
 #ifndef NO_DEBUG
     #define STACK_ASSERT(stack) StackAssert(stack, __FILE__, __func__, __LINE__)
 
-    #define ERROR_CHECK(error_code_var, error_code) if((error_code_var & error_code) == error_code) \
+    #define ERROR_CHECK(error_code_var, error_code) if ((error_code_var & error_code) == error_code) \
                                                         fprintf(stderr, "ERROR: " #error_code "\n")
 #else
     #define STACK_ASSERT(stack)

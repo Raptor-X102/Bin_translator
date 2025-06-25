@@ -11,14 +11,14 @@ bool Check_r_w_flags(int check_option, char** argv, int argc, ...) {
 
     for(int i = 0; i < argc; i++) {
 
-        if(!strcmp(argv[i], "-rf")) {
+        if (!strcmp(argv[i], "-rf")) {
 
             char** input_file_name = va_arg(args, char** );
             *input_file_name = argv[i+1];
             rf_flag_found = true;
         }
 
-        if(!strcmp(argv[i], "-wf")) {
+        if (!strcmp(argv[i], "-wf")) {
 
             char** output_file_name = va_arg(args, char** );
             *output_file_name = argv[i+1];
@@ -28,12 +28,12 @@ bool Check_r_w_flags(int check_option, char** argv, int argc, ...) {
 
     va_end(args);
 
-    if(check_option & CHECK_R)
-        if(rf_flag_found)
+    if (check_option & CHECK_R)
+        if (rf_flag_found)
             flags_check_succsess = true;
 
-    if(check_option & CHECK_W)
-        if(wf_flag_found)
+    if (check_option & CHECK_W)
+        if (wf_flag_found)
             flags_check_succsess = true;
 
         else

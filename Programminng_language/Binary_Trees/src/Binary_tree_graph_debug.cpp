@@ -4,7 +4,7 @@ bool Tree_graph_debug(Node* root, const char* output_file_name,
                       void (*Print_tree_data) (const void* data, FILE* file)) {
 
     FILE* output_file = fopen(output_file_name, "wb+");
-    if(!output_file) {
+    if (!output_file) {
 
         DEBUG_PRINTF("ERROR: file %s was not opened\n", output_file_name);
         return false;
@@ -24,7 +24,7 @@ bool Tree_graph_debug(Node* root, const char* output_file_name,
 
     fclose(output_file);
 
-    if(!System_call_GraphViz(output_file_name)) {
+    if (!System_call_GraphViz(output_file_name)) {
 
         DEBUG_PRINTF("DONE\n");
         DEBUG_PRINTF("ERROR: System_call_GraphViz failed\n");
@@ -50,10 +50,10 @@ void Create_nodes(Node* root, FILE* output_file, void (*Print_tree_data) (const 
     PRINTOUT(" | <right> Right_node: %p }}", root->right_node);
     PRINTOUT("\"];\n");
 
-    if(root->left_node)
+    if (root->left_node)
         Create_nodes(root->left_node, output_file, Print_tree_data);
 
-    if(root->right_node)
+    if (root->right_node)
         Create_nodes(root->right_node, output_file, Print_tree_data);
 
 }
@@ -66,7 +66,7 @@ void Create_nodes_akinator(Node* root, FILE* output_file,
     "<TABLE COLOR=\"red\" CELLSPACING=\"2\" CELLPADDING=\"2\" BORDER=\"3\"><TR><TD>", root);
     Print_tree_data(&root->node_data, output_file);
     PRINTOUT("</TD></TR>");
-    if(Check_image_existence(&root->node_data)) {
+    if (Check_image_existence(&root->node_data)) {
 
         PRINTOUT("\n<TR><TD><IMG SRC=\"Images\\");
         Print_tree_data(&root->node_data, output_file);
@@ -75,10 +75,10 @@ void Create_nodes_akinator(Node* root, FILE* output_file,
 
     PRINTOUT("</TABLE>>]\n");
 
-    if(root->left_node)
+    if (root->left_node)
         Create_nodes_akinator(root->left_node, output_file, Print_tree_data);
 
-    if(root->right_node)
+    if (root->right_node)
         Create_nodes_akinator(root->right_node, output_file, Print_tree_data);
 
 }
@@ -88,7 +88,7 @@ bool Check_image_existence(const void* filename_ptr) {
     char* filename = NULL, foldername[] = "Images\\", extension[] = ".png";
     memcpy(&filename, filename_ptr, sizeof(char*));
     char* path = (char*) calloc(strlen(foldername) + strlen(filename) + Calloc_add, sizeof(char));
-    if(!path) {
+    if (!path) {
 
         DEBUG_PRINTF("ERROR: memory was not allocated\n");
         return false;
@@ -97,7 +97,7 @@ bool Check_image_existence(const void* filename_ptr) {
     memcpy(path, foldername, strlen(foldername));
     memcpy(path + strlen(foldername), filename, strlen(filename));
     memcpy(path + strlen(foldername) + strlen(filename), extension, strlen(extension));
-    if(_access(path, 0) == -1) {
+    if (_access(path, 0) == -1) {
 
         free(path);
         return false;
@@ -112,7 +112,7 @@ bool Check_image_existence(const void* filename_ptr) {
 
 void Create_edges_akinator(Node* root, FILE* output_file) {
 
-    if(root->left_node) {
+    if (root->left_node) {
 
         PRINTOUT("node%p -> ", root);
         PRINTOUT("node%p[color = \"#ff0505\", splines = polylines, arrowsize = 3, fontsize=70, "
@@ -120,7 +120,7 @@ void Create_edges_akinator(Node* root, FILE* output_file) {
         Create_edges_akinator(root->left_node, output_file);
     }
 
-    if(root->right_node) {
+    if (root->right_node) {
 
         PRINTOUT("node%p -> ", root);
         PRINTOUT("node%p[color = \"#ff0505\", splines = polylines, arrowsize = 3, fontsize=70, "
@@ -131,7 +131,7 @@ void Create_edges_akinator(Node* root, FILE* output_file) {
 
 void Create_edges(Node* root, FILE* output_file) {
 
-    if(root->left_node) {
+    if (root->left_node) {
 
         PRINTOUT("node%p:left -> ", root);                       //arrowsize = 5, penwidth = 10
         PRINTOUT("node%p[color = \"#ff0505\", splines = polylines, fontsize=12];\n",
@@ -139,7 +139,7 @@ void Create_edges(Node* root, FILE* output_file) {
         Create_edges(root->left_node, output_file);
     }
 
-    if(root->right_node) {
+    if (root->right_node) {
 
         PRINTOUT("node%p:right -> ", root);
         PRINTOUT("node%p[color = \"#ff0505\", splines = polylines, fontsize=12];\n",
@@ -154,7 +154,7 @@ bool System_call_GraphViz(const char* output_file_name) {
     int name_offset = 0;
     char* cmd_buffer = (char*) calloc(strlen(command) + 2 * strlen(output_file_name) + Calloc_add,
                                                                                      sizeof(char));
-    if(!cmd_buffer) {
+    if (!cmd_buffer) {
 
         return false;
         DEBUG_PRINTF("ERROR: memory was not allocated\n");
@@ -162,17 +162,17 @@ bool System_call_GraphViz(const char* output_file_name) {
 
     char* tmp_ptr = strchr(output_file_name, '.');
 
-    if(!tmp_ptr) {
+    if (!tmp_ptr) {
 
         DEBUG_PRINTF("ERROR: wrong filename format\n");
         return false;
     }
 
-    if(tmp_ptr[1] == '\\') {
+    if (tmp_ptr[1] == '\\') {
 
         tmp_ptr = strchr(tmp_ptr+1, '.');
         name_offset = 2;
-        if(!tmp_ptr) {
+        if (!tmp_ptr) {
 
             free(command);
             free(cmd_buffer);
