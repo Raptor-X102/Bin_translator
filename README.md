@@ -24,7 +24,7 @@ RXcc.exe -s Solve_quad_eq.txt -a First_exe.asm -d Lang_debug.dot -o First_exe -M
 ## Особенности реализации
 
 Для того, чтобы компилировать код сразу в x86-64, необходимо генерировать exe-файл. Проект писался на windows 11, поэтому разобраться в том, как генерировать пролог и эпилог файла не было возможности. Для этого пришлось бы разбираться в том, как работает CRT инициализация/деинициализация, менять все относительные адреса после генерации и так далее. Поэтому было принято решение облегчить задачу, генерируя exe-файл нужного размера спомощью компилятора g++. Об этом далее.
-Основной файлы, генерирующий x86-64 код - Backend_funcs_x64.cpp и Backend_funcs_x64.h. Запись инструкций происходит в динамический массив (директория [Dynamic_array](https://github.com/Raptor-X102/Bin_translator/tree/main/Dynamic_array)) с помощью различный макросов. После того, как весь код записан, генерируется cpp-файл [In_out_mod.cpp](https://github.com/Raptor-X102/Bin_translator/blob/main/In_out_modules/In_out_mod.cpp) на основе исходного файла [In_out_modules.cpp](https://github.com/Raptor-X102/Bin_translator/blob/main/In_out_modules/In_out_modules.cpp). В него записывается количество ассемблерных вставок иструкции nop, равное размеру скомпилированного кода. Далее этот файл компилируется в исполняемый файл. В него вставляется скомпилированный код и получается на выходе exe-файл вашего кода, написанного на моем языке.
+Основной файлы, генерирующий x86-64 код - Backend_funcs_x64.cpp и Backend_funcs_x64.h. Запись инструкций происходит в динамический массив (директория [Dynamic_array](https://github.com/Raptor-X102/Bin_translator/tree/main/libs/Dynamic_array)) с помощью различный макросов. После того, как весь код записан, генерируется cpp-файл [In_out_mod.cpp](https://github.com/Raptor-X102/Bin_translator/blob/main/In_out_modules/In_out_mod.cpp) на основе исходного файла [In_out_modules.cpp](https://github.com/Raptor-X102/Bin_translator/blob/main/In_out_modules/In_out_modules.cpp). В него записывается количество ассемблерных вставок иструкции nop, равное размеру скомпилированного кода. Далее этот файл компилируется в исполняемый файл. В него вставляется скомпилированный код и получается на выходе exe-файл вашего кода, написанного на моем языке.
 
 ### Более тонкие нюансы исполнения
 
@@ -53,20 +53,20 @@ rbp
 Такое соглашение о вызовах было принято в связи с тем, что проще всего передавать параметры через стек. В windows calling conventions принято выделять еще теневой стек, дополнительный 32 байта либо под первые 4 аргумента, которые передаются через регистры, либо для отладки. Поэтому было принято решение оптимизировать это место. Также удобно разделять локальные переменные и передваемые параметры.
 6. Перед каждым вызовом функции для выравнивания стека на 16 (для корректной работы с xmm-регистрами) вызывается 1 из двух вспомогательных функций check_alignment (even, odd; их реализация в [Backend_funcs_nasm.cpp](https://github.com/Raptor-X102/Bin_translator/blob/main/src/Backend_funcs_nasm.cpp) и [Backend_funcs_x64.cpp](https://github.com/Raptor-X102/Bin_translator/blob/main/src/Backend_funcs_x64.cpp)) в зависимости от числа параметров у вызываемой функции.
 7. Расположение функций разработчика относительно main не важно: пользователь может вставлять их как до, так и после. Это реальизовано с помощью самой первой инструкции - jmp main.
-![First_jmp](Diagrams/First_jmp.png)
+![First_jmp](README_pictures/First_jmp.png)
 
 ## Генерация кода из AST
 
 В данном разделе подробнее рассмотрим как в функции [Backend_funcs_x64.cpp](https://github.com/Raptor-X102/Bin_translator/blob/main/src/Backend_funcs_x64.cpp) и [Backend_funcs_nasm.cpp](https://github.com/Raptor-X102/Bin_translator/blob/main/src/Backend_funcs_nasm.cpp) транслируют код.
-Все примеры основаны на программах в [Programminng_language/other/Input_data](https://github.com/Raptor-X102/Bin_translator/tree/main/Programminng_language/other/Input_data). Если скомпилировать их с debug-фдагом "-d", создадутся AST ([Programminng_language/other/Debug](https://github.com/Raptor-X102/Bin_translator/tree/main/Programminng_language/other/Debug)).
+Все примеры основаны на программах в [examples/Input_data](https://github.com/Raptor-X102/Bin_translator/tree/main/examples/Input_data). Если скомпилировать их с debug-фдагом "-d", создадутся AST ([examples/Debug](https://github.com/Raptor-X102/Bin_translator/tree/main/examples/Debug)).
 
 Теперь передйем к деталям реализации. Разбирать будем сверху вниз дерева, т.е. от корня к листьям.
 
 Замечание: далее будут диаграммы с частями AST. Они изменены для более наглядного представления и содержат меньше нужной для отладки информации. Поэтому реальные будут отличаться от этих.
 
 ## Объявление и реализация функции пользователя
-Пример из [Solve_quad_eq_dbg.png](https://github.com/Raptor-X102/Bin_translator/blob/main/Programminng_language/other/Debug/Solve_quad_eq_dbg.png).
-![Func_def](Diagrams/Func_def.png)
+Пример из [Solve_quad_eq_dbg.png](https://github.com/Raptor-X102/Bin_translator/tree/main/examples/Debug/Solve_quad_eq_dbg.png).
+![Func_def](README_pictures/Func_def.png)
 Параметры всегда распалагаются в летвой ветке названия функции, подвязываются за разделительные запятые. Тело находится в правой ветке.
 
 <details>
@@ -92,7 +92,7 @@ rbp
 
 Каждая функция выравнивается до адреса, кратного 16. Это делается, во-первых из-за соглашения в Windows, во-вторых, для большей скорости, в-третьих, для работы с xmm-регистрами, которые требуют этого. Поскольку основной exe-файл генерируется gcc компилятором, то гарантируется, что функция main выровнена как минимум на 16. Поэтому мы в праве рассчитывать относительно main выравнивание.
 Дизассемблер пролога
-![Func_def](Diagrams/Func_def_disasm.png)
+![Func_def](README_pictures/Func_def_disasm.png)
 Как мы видим, адрес выровнен на 16.
 
 ## Операции
@@ -278,17 +278,17 @@ if (tmp_data->expression_type == OP) {
 Если операция бинарная, с вершины стека берется второй операнд, а затем первый. В унарной операции Берется только одно значение.
 Модуль реализован следующим образом: с вершины стека берется значение, во второй операнд кладестя маска (Double_sign_mask = 0x7FFFFFFFFFFFFFFF). Она обнуляет старший знаковый бит функцией andpd.
 
-Примеры из [Solve_quad_eq_dbg.png](https://github.com/Raptor-X102/Bin_translator/blob/main/Programminng_language/other/Debug/Solve_quad_eq_dbg.png).
+Примеры из [Solve_quad_eq_dbg.png](https://github.com/Raptor-X102/Bin_translator/tree/main/examples/Debug/Solve_quad_eq_dbg.png).
 Бинарные функции:
-![Bin_op](Diagrams/Bin_op.png)
+![Bin_op](README_pictures/Bin_op.png)
 Пример трансляции (0xBFF0000000000000 = -1; 0x4000000000000000 = 2)
-![Bin_op_disasm](Diagrams/Bin_op_disasm.png)
+![Bin_op_disasm](README_pictures/Bin_op_disasm.png)
 
 Унарная функция (корень):
-![Sqrtsd_disasm](Diagrams/Sqrtsd_disasm.png)
+![Sqrtsd_disasm](README_pictures/Sqrtsd_disasm.png)
 
 Модуль:
-![Abs_disasm](Diagrams/Abs_disasm.png)
+![Abs_disasm](README_pictures/Abs_disasm.png)
 
 4. Вызов функции
 
@@ -516,21 +516,21 @@ void Check_alignment_prologue_x64(Dynamic_array* d_array_code, Func_data_list* f
 Если функция имеет четное число параметров, то вызывается check_align_even_index, в противном случае check_align_odd_index. Пусть перед вызовом пользовательской функции адрес стека равен stack_addr. Когда вызывается функция выравнивания, в стек кладется адрес возврата (8 байт), следовательно теперь адрес стека (stack_addr - 0x8). Нам нужно, чтоб когда мы вызвали функцию
 адрес стека был выровнен на 16. Соответственно, если stack_frame - 8 (8 за счет (rbp)) не кратно 16, то вычитаем 8, иначе вычитаем 0. До пуша параметров был адрес stack_addr, после пуша он равен stack_frame - (8 * кол-во параметров). Т.е. чтобы добиться желаемого, нам нужно, чтобы stack_frame и (8 * кол-во параметров) были одинаковой кратности. Если параметров четное количество, то нужно обеспечить, чтоб stack_frame был кратен 16. Пусть параметров нечетное количесто, а адрес выровнен на 16. В таком случае нам нужно вычитать. Когда мы вызываем функцию выравнивания, адрес становится не кратным 16 (имеет вид 0xXXXX...X8). Поэтому мы просто берем младшие 4 бита. Если же параметров четное количество, то вычитать не нужно. В таком случае нам нужно инвертировать 3-й бит адреса стека в функции выравнивания.
 Пример компиляции функций выравнивания
-![Alignment_disasm](Diagrams/Alignment_disasm.png)
+![Alignment_disasm](README_pictures/Alignment_disasm.png)
 
 После функций выравнивания вызывается функция пуша параметров Compile_push_parameters_x64.
 
 Пример компиляции вызова функций
 In:
-![Alignment_disasm](Diagrams/In_disasm.png)
+![Alignment_disasm](README_pictures/In_disasm.png)
 Out:
-![Alignment_disasm](Diagrams/Out_disasm.png)
+![Alignment_disasm](README_pictures/Out_disasm.png)
 Solve_quad_eq:
 Сначала вызывается функция выравнивания, потом Solve_quad_eq
-![Alignment_disasm](Diagrams/Call_disasm.png)
+![Alignment_disasm](README_pictures/Call_disasm.png)
 
 ### Ветвления (if)
-![If](Diagrams/If.png)
+![If](README_pictures/If.png)
 
 Основа ветвления - условные и безусловные прыжки. Начнем подробно разбирать, как они реализованы в RXcc.
 
@@ -688,8 +688,8 @@ bool Compile_if_x64(Dynamic_array* d_array_code, Dynamic_array* d_array_funcs, N
 
 ### Цикл (while)
 
-Примеры из [Code_example_dbg.png](https://github.com/Raptor-X102/Bin_translator/blob/main/Programminng_language/other/Debug/Code_example_dbg.png), исходный файл [Code_example.txt](https://github.com/Raptor-X102/Bin_translator/blob/main/Programminng_language/other/Input_data/Code_example.txt).
-![While](Diagrams/While.png)
+Примеры из [Code_example_dbg.png](https://github.com/Raptor-X102/Bin_translator/tree/main/examples/Debug/Code_example_dbg.png), исходный файл [Code_example.txt](https://github.com/Raptor-X102/Bin_translator/tree/main/examples/Input_data/Code_example.txt).
+![While](README_pictures/While.png)
 Цикл построен следующим образом
 
 ```
@@ -740,11 +740,11 @@ bool Compile_while_x64(Dynamic_array* d_array_code, Dynamic_array* d_array_funcs
 </details>
 
 Пример компиляции
-![While](Diagrams/While_disasm.png)
+![While](README_pictures/While_disasm.png)
 
 ### Присваивание (=)
 
-![Assignment](Diagrams/Assignment.png)
+![Assignment](README_pictures/Assignment.png)
 
 <details>
 <summary>Показать реализацию Compile_assignment_x64</summary>
@@ -795,7 +795,7 @@ bool Compile_assignment_x64(Dynamic_array* d_array_code, Dynamic_array* d_array_
 </details>
 
 Пример компиляции
-![Assignment_disasm](Diagrams/Assignment_disasm.png)
+![Assignment_disasm](README_pictures/Assignment_disasm.png)
 
 
 ### Вызов функции
@@ -829,7 +829,7 @@ bool Compile_return_x64(Dynamic_array* d_array_code, Dynamic_array* d_array_func
 ```
 </details>
 
-![Return_disasm](Diagrams/Return_disasm.png)
+![Return_disasm](README_pictures/Return_disasm.png)
 
 
 ## Создание exe-файла
@@ -1021,7 +1021,7 @@ void Fill_jmp_call_addresses(Dynamic_array* d_array_code, Dynamic_array* d_array
 
 ## Перенос кода в exe-файл
 
-Мы ранее уже нашли, где располагается main в нашем exe-файле, поэтому остается только копировать код из d_array_code в нужное место. Реализация Memcpy_safe в [Memcpy_upgrade.cpp](https://github.com/Raptor-X102/Bin_translator/blob/main/Memcpy_upgrade/Memcpy_upgrade.cpp).
+Мы ранее уже нашли, где располагается main в нашем exe-файле, поэтому остается только копировать код из d_array_code в нужное место. Реализация Memcpy_safe в [Memcpy_upgrade.cpp](https://github.com/Raptor-X102/Bin_translator/blob/main/libs/Memcpy_upgrade/Memcpy_upgrade.cpp).
 
 ```c
 
@@ -1053,7 +1053,7 @@ fclose(exe_output_file);
 
 Принцип идентичный, только намного проще работать с метками вместо относительных адресов.
 Для создания меток используется счетчик, который увеличивается с каждой созданной меткой.
-Подробнее в файлах [Backend_funcs_nasm.cpp](https://github.com/Raptor-X102/Bin_translator/blob/main/src/Backend_funcs_nasm.cpp) и [Backend_funcs_nasm.h](https://github.com/Raptor-X102/Bin_translator/blob/main/headers/Backend_funcs_nasm.h). Примеры скомпилированных файлов в [Programminng_language/other/asm_files](https://github.com/Raptor-X102/Bin_translator/tree/main/Programminng_language/other/asm_files)
+Подробнее в файлах [Backend_funcs_nasm.cpp](https://github.com/Raptor-X102/Bin_translator/blob/main/src/Backend_funcs_nasm.cpp) и [Backend_funcs_nasm.h](https://github.com/Raptor-X102/Bin_translator/blob/main/headers/Backend_funcs_nasm.h). Примеры скомпилированных файлов в [Programminng_language/other/asm_files](https://github.com/Raptor-X102/Bin_translator/tree/main/examples/compiled/nasm_files)
 
 <details>
 <summary>Показать nasm-версию Code_example1.asm</summary>
