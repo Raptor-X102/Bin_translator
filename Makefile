@@ -10,10 +10,11 @@ XASMFLAGS = -f elf64 -ggdb3 -F dwarf
 DEBUG = NO_DEBUG
 # Директории исходников и объектных файлов
 LANGUAGE = Programminng_language
+LIBS = libs
 BINARY_TREES = $(LANGUAGE)/Binary_Trees
 PROCESSOR = $(LANGUAGE)/Processor
 STACK = $(BINARY_TREES)/Stack
-SRC_DIRS = src Get_file_size Check_flags Dynamic_array Memcpy_upgrade Memdup $(LANGUAGE)/src $(BINARY_TREES)/src $(PROCESSOR)/src $(STACK)/src
+SRC_DIRS = src $(LIBS)/Get_file_size $(LIBS)/Check_flags $(LIBS)/Dynamic_array $(LIBS)/Memcpy_upgrade $(LIBS)/Memdup $(LANGUAGE)/src $(BINARY_TREES)/src $(PROCESSOR)/src $(STACK)/src
 SRC_CPP = $(wildcard $(addsuffix /*.cpp,$(SRC_DIRS)))
 SRC_ASM = $(wildcard $(addsuffix /*.asm,$(SRC_DIRS)))
 
@@ -42,7 +43,7 @@ clean:
 # Универсальное правило для .cpp файлов
 $(OBJ_DIR)/%.o: %.cpp
 	@mkdir -p $(@D)
-	@$(CXX) -D $(DEBUG) $(CXXFLAGS) -Iheaders -IGet_file_size -ICheck_flags -IDynamic_array -IMemcpy_upgrade -DMemdup -I$(LANGUAGE)/headers -I$(BINARY_TREES)/headers -I$(PROCESSOR)/headers -I$(STACK)/headers -c $< -o $@
+	@$(CXX) -D $(DEBUG) $(CXXFLAGS) -Iheaders -I $(LIBS)/Get_file_size -I $(LIBS)/Check_flags -I $(LIBS)/Dynamic_array -I $(LIBS)/Memcpy_upgrade -I $(LIBS)/Memdup -I$(LANGUAGE)/headers -I$(BINARY_TREES)/headers -I$(PROCESSOR)/headers -I$(STACK)/headers -c $< -o $@
 	@echo "Compiled $<"
 
 # Компиляция .asm файлов
@@ -58,7 +59,7 @@ $(OUT): $(OBJ_CPP)
 	@echo "Linking completed: $@"
 
 compile_asm:
-	$(CXX) -D $(DEBUG) -S -masm=intel -c $(SRC_CPP) $(CXXFLAGS) -Iheaders -Ilist/headers -IGet_file_size -ICheck_flags
+	$(CXX) -D $(DEBUG) -S -masm=intel -c $(SRC_CPP) $(CXXFLAGS) -Iheaders -Ilist/headers -I $(LIBS)/Get_file_size -I $(LIBS)/Check_flags
 	mv *.s $(ASM_DIR)
 
 NO_ASLR_FLAG = -Wl,--disable-dynamicbase

@@ -1,0 +1,74 @@
+digraph List{
+rankdir=TB;
+bgcolor="#f5cbaf";
+node[fontsize=12, style=filled, fillcolor = "#f56e31", fontcolor="#000000", shape="none",style="rounded"];
+edge[color="#ff05ff",fontcolor="blue", splines = polylines];
+
+node00000284eec682d0[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec682d0 | Data: expression_type = 0XDEAD (SPECIAL_SYMBOL), \n value = 0XF7 | { <left> Left_node: 00000284eec673b0 | <right> Right_node: 00000284eec67e50 }}"];
+node00000284eec673b0[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec673b0 | Data: expression_type = 0X4 (FUNCTION), \n value = fact | { <left> Left_node: 00000284eec67470 | <right> Right_node: 00000284eec677a0 }}"];
+node00000284eec67470[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec67470 | Data: expression_type = 0X2 (VAR), \n value = n | { <left> Left_node: 0000000000000000 | <right> Right_node: 0000000000000000 }}"];
+node00000284eec677a0[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec677a0 | Data: expression_type = 0XC0DE (KEY_WORD), \n value = (o_0) 0XE0 | { <left> Left_node: 00000284eec68c40 | <right> Right_node: 00000284eec68cc0 }}"];
+node00000284eec68c40[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec68c40 | Data: expression_type = 0X5 (CONDITION), \n value = 0XD4 | { <left> Left_node: 00000284eec67560 | <right> Right_node: 00000284eec67580 }}"];
+node00000284eec67560[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec67560 | Data: expression_type = 0X2 (VAR), \n value = n | { <left> Left_node: 0000000000000000 | <right> Right_node: 0000000000000000 }}"];
+node00000284eec67580[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec67580 | Data: expression_type = 0X3 (OP), \n value = sqrt 0X28
+ | { <left> Left_node: 00000284eec67720 | <right> Right_node: 0000000000000000 }}"];
+node00000284eec67720[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec67720 | Data: expression_type = 0X1 (NUM), \n value = 1 | { <left> Left_node: 0000000000000000 | <right> Right_node: 0000000000000000 }}"];
+node00000284eec68cc0[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec68cc0 | Data: expression_type = 0XBEAF (IF_BRANCHES), \n value = CONNECTOR | { <left> Left_node: 00000284eec68090 | <right> Right_node: 00000284eec67db0 }}"];
+node00000284eec68090[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec68090 | Data: expression_type = 0XC0DE (KEY_WORD), \n value = *(^_^)* 0XE4 | { <left> Left_node: 0000000000000000 | <right> Right_node: 00000284eec683d0 }}"];
+node00000284eec683d0[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec683d0 | Data: expression_type = 0X2 (VAR), \n value = n | { <left> Left_node: 0000000000000000 | <right> Right_node: 0000000000000000 }}"];
+node00000284eec67db0[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec67db0 | Data: expression_type = 0XC0DE (KEY_WORD), \n value = *(^_^)* 0XE4 | { <left> Left_node: 0000000000000000 | <right> Right_node: 00000284eec67ef0 }}"];
+node00000284eec67ef0[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec67ef0 | Data: expression_type = 0X3 (OP), \n value = * 0X5
+ | { <left> Left_node: 00000284eec67f90 | <right> Right_node: 00000284eec68170 }}"];
+node00000284eec67f90[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec67f90 | Data: expression_type = 0X2 (VAR), \n value = n | { <left> Left_node: 0000000000000000 | <right> Right_node: 0000000000000000 }}"];
+node00000284eec68170[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec68170 | Data: expression_type = 0X4 (FUNCTION), \n value = fact | { <left> Left_node: 00000284eec67eb0 | <right> Right_node: 0000000000000000 }}"];
+node00000284eec67eb0[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec67eb0 | Data: expression_type = 0X3 (OP), \n value = - 0X3
+ | { <left> Left_node: 00000284eec68510 | <right> Right_node: 00000284eec67f70 }}"];
+node00000284eec68510[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec68510 | Data: expression_type = 0X2 (VAR), \n value = n | { <left> Left_node: 0000000000000000 | <right> Right_node: 0000000000000000 }}"];
+node00000284eec67f70[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec67f70 | Data: expression_type = 0X1 (NUM), \n value = 1 | { <left> Left_node: 0000000000000000 | <right> Right_node: 0000000000000000 }}"];
+node00000284eec67e50[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec67e50 | Data: expression_type = 0X4 (FUNCTION), \n value = main | { <left> Left_node: 0000000000000000 | <right> Right_node: 00000284eec688a0 }}"];
+node00000284eec688a0[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec688a0 | Data: expression_type = 0XDEAD (SPECIAL_SYMBOL), \n value = 0XF00 | { <left> Left_node: 00000284eec68190 | <right> Right_node: 00000284eec68c00 }}"];
+node00000284eec68190[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec68190 | Data: expression_type = 0X4 (FUNCTION), \n value = In | { <left> Left_node: 00000284eec689e0 | <right> Right_node: 0000000000000000 }}"];
+node00000284eec689e0[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec689e0 | Data: expression_type = 0X2 (VAR), \n value = n | { <left> Left_node: 0000000000000000 | <right> Right_node: 0000000000000000 }}"];
+node00000284eec68c00[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec68c00 | Data: expression_type = 0XDEAD (SPECIAL_SYMBOL), \n value = 0XF00 | { <left> Left_node: 00000284eec68a00 | <right> Right_node: 00000284eec68a40 }}"];
+node00000284eec68a00[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec68a00 | Data: expression_type = 0XDEAD (SPECIAL_SYMBOL), \n value = 0XFA | { <left> Left_node: 00000284eec68760 | <right> Right_node: 00000284eec687a0 }}"];
+node00000284eec68760[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec68760 | Data: expression_type = 0X2 (VAR), \n value = a | { <left> Left_node: 0000000000000000 | <right> Right_node: 0000000000000000 }}"];
+node00000284eec687a0[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec687a0 | Data: expression_type = 0X4 (FUNCTION), \n value = fact | { <left> Left_node: 00000284eec688c0 | <right> Right_node: 0000000000000000 }}"];
+node00000284eec688c0[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec688c0 | Data: expression_type = 0X2 (VAR), \n value = n | { <left> Left_node: 0000000000000000 | <right> Right_node: 0000000000000000 }}"];
+node00000284eec68a40[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec68a40 | Data: expression_type = 0XDEAD (SPECIAL_SYMBOL), \n value = 0XF00 | { <left> Left_node: 00000284eec68720 | <right> Right_node: 00000284eec689c0 }}"];
+node00000284eec68720[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec68720 | Data: expression_type = 0X4 (FUNCTION), \n value = Out | { <left> Left_node: 00000284eec68e60 | <right> Right_node: 0000000000000000 }}"];
+node00000284eec68e60[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec68e60 | Data: expression_type = 0X2 (VAR), \n value = a | { <left> Left_node: 0000000000000000 | <right> Right_node: 0000000000000000 }}"];
+node00000284eec689c0[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec689c0 | Data: expression_type = 0XC0DE (KEY_WORD), \n value = *(^_^)* 0XE4 | { <left> Left_node: 0000000000000000 | <right> Right_node: 00000284eec68c20 }}"];
+node00000284eec68c20[color = "#ff030f", fillcolor = "#f56e31", style=filled, shape = record,  label = "{ Address: 00000284eec68c20 | Data: expression_type = 0X1 (NUM), \n value = 0 | { <left> Left_node: 0000000000000000 | <right> Right_node: 0000000000000000 }}"];
+node00000284eec682d0:left -> node00000284eec673b0[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec673b0:left -> node00000284eec67470[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec673b0:right -> node00000284eec677a0[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec677a0:left -> node00000284eec68c40[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec68c40:left -> node00000284eec67560[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec68c40:right -> node00000284eec67580[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec67580:left -> node00000284eec67720[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec677a0:right -> node00000284eec68cc0[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec68cc0:left -> node00000284eec68090[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec68090:right -> node00000284eec683d0[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec68cc0:right -> node00000284eec67db0[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec67db0:right -> node00000284eec67ef0[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec67ef0:left -> node00000284eec67f90[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec67ef0:right -> node00000284eec68170[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec68170:left -> node00000284eec67eb0[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec67eb0:left -> node00000284eec68510[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec67eb0:right -> node00000284eec67f70[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec682d0:right -> node00000284eec67e50[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec67e50:right -> node00000284eec688a0[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec688a0:left -> node00000284eec68190[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec68190:left -> node00000284eec689e0[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec688a0:right -> node00000284eec68c00[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec68c00:left -> node00000284eec68a00[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec68a00:left -> node00000284eec68760[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec68a00:right -> node00000284eec687a0[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec687a0:left -> node00000284eec688c0[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec68c00:right -> node00000284eec68a40[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec68a40:left -> node00000284eec68720[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec68720:left -> node00000284eec68e60[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec68a40:right -> node00000284eec689c0[color = "#ff0505", splines = polylines, fontsize=12];
+node00000284eec689c0:right -> node00000284eec68c20[color = "#ff0505", splines = polylines, fontsize=12];
+
+}
