@@ -113,35 +113,25 @@ rbp
 
 ```c
 
-    if (tmp_data->value == IF && tmp_data->expression_type == KEY_WORD) {
-
-        if (!Compile_if_x64(d_array_code, d_array_funcs, root, func_list, index))
-            return false;
-    }
-
-    else if (tmp_data->value == WHILE && tmp_data->expression_type == KEY_WORD) {
-
-        if (!Compile_while_x64(d_array_code, d_array_funcs, root, func_list, index))
-            return false;
-    }
-
-    else if (tmp_data->value == ASSIGNMENT && tmp_data->expression_type == SPECIAL_SYMBOL) {
-
-        if (!Compile_assignment_x64(d_array_code, d_array_funcs, root, func_list, index))
-            return false;
-    }
-
-    else if (tmp_data->expression_type == FUNCTION) {
+    if (tmp_data->expression_type == FUNCTION) {
 
         if (!Compile_user_function_x64(d_array_code, d_array_funcs, root, func_list, index))
             return false;
     }
 
-    else if (tmp_data->value == RETURN && tmp_data->expression_type == KEY_WORD) {
-
-        if (!Compile_return_x64(d_array_code, d_array_funcs, root, func_list, index))
-            return false;
+    #define OPERATION_X64(name, opcode, type) \
+    else if (tmp_data->value == opcode && tmp_data->expression_type == type) {\
+    \
+        if (!Compile_##name##_x64(d_array_code, d_array_funcs, root, func_list, index))\
+            return false;\
     }
+
+    OPERATION_X64(if, IF, KEY_WORD)
+    OPERATION_X64(while, WHILE, KEY_WORD)
+    OPERATION_X64(assignment, ASSIGNMENT, SPECIAL_SYMBOL)
+    OPERATION_X64(return, RETURN, KEY_WORD)
+
+    #undef OPERATION_X64
 
     else {
 
