@@ -53,6 +53,7 @@ rbp
 Такое соглашение о вызовах было принято в связи с тем, что проще всего передавать параметры через стек. В windows calling conventions принято выделять еще теневой стек, дополнительный 32 байта либо под первые 4 аргумента, которые передаются через регистры, либо для отладки. Поэтому было принято решение оптимизировать это место. Также удобно разделять локальные переменные и передваемые параметры.
 6. Перед каждым вызовом функции для выравнивания стека на 16 (для корректной работы с xmm-регистрами) вызывается 1 из двух вспомогательных функций check_alignment (even, odd; их реализация в [Backend_funcs_nasm.cpp](https://github.com/Raptor-X102/Bin_translator/blob/main/src/Backend_funcs_nasm.cpp) и [Backend_funcs_x64.cpp](https://github.com/Raptor-X102/Bin_translator/blob/main/src/Backend_funcs_x64.cpp)) в зависимости от числа параметров у вызываемой функции.
 7. Расположение функций разработчика относительно main не важно: пользователь может вставлять их как до, так и после. Это реальизовано с помощью самой первой инструкции - jmp main.
+
 ![First_jmp](README_pictures/First_jmp.png)
 
 ## Генерация кода из AST
@@ -66,7 +67,9 @@ rbp
 
 ## Объявление и реализация функции пользователя
 Пример из [Solve_quad_eq_dbg.png](https://github.com/Raptor-X102/Bin_translator/tree/main/examples/Debug/Solve_quad_eq_dbg.png).
+
 ![Func_def](README_pictures/Func_def.png)
+
 Параметры всегда распалагаются в летвой ветке названия функции, подвязываются за разделительные запятые. Тело находится в правой ветке.
 
 <details>
@@ -92,7 +95,9 @@ rbp
 
 Каждая функция выравнивается до адреса, кратного 16. Это делается, во-первых из-за соглашения в Windows, во-вторых, для большей скорости, в-третьих, для работы с xmm-регистрами, которые требуют этого. Поскольку основной exe-файл генерируется gcc компилятором, то гарантируется, что функция main выровнена как минимум на 16. Поэтому мы в праве рассчитывать относительно main выравнивание.
 Дизассемблер пролога
+
 ![Func_def](README_pictures/Func_def_disasm.png)
+
 Как мы видим, адрес выровнен на 16.
 
 ## Операции
@@ -279,15 +284,21 @@ if (tmp_data->expression_type == OP) {
 Модуль реализован следующим образом: с вершины стека берется значение, во второй операнд кладестя маска (Double_sign_mask = 0x7FFFFFFFFFFFFFFF). Она обнуляет старший знаковый бит функцией andpd.
 
 Примеры из [Solve_quad_eq_dbg.png](https://github.com/Raptor-X102/Bin_translator/tree/main/examples/Debug/Solve_quad_eq_dbg.png).
+
 Бинарные функции:
+
 ![Bin_op](README_pictures/Bin_op.png)
+
 Пример трансляции (0xBFF0000000000000 = -1; 0x4000000000000000 = 2)
+
 ![Bin_op_disasm](README_pictures/Bin_op_disasm.png)
 
 Унарная функция (корень):
+
 ![Sqrtsd_disasm](README_pictures/Sqrtsd_disasm.png)
 
 Модуль:
+
 ![Abs_disasm](README_pictures/Abs_disasm.png)
 
 4. Вызов функции
@@ -516,20 +527,29 @@ void Check_alignment_prologue_x64(Dynamic_array* d_array_code, Func_data_list* f
 Если функция имеет четное число параметров, то вызывается check_align_even_index, в противном случае check_align_odd_index. Пусть перед вызовом пользовательской функции адрес стека равен stack_addr. Когда вызывается функция выравнивания, в стек кладется адрес возврата (8 байт), следовательно теперь адрес стека (stack_addr - 0x8). Нам нужно, чтоб когда мы вызвали функцию
 адрес стека был выровнен на 16. Соответственно, если stack_frame - 8 (8 за счет (rbp)) не кратно 16, то вычитаем 8, иначе вычитаем 0. До пуша параметров был адрес stack_addr, после пуша он равен stack_frame - (8 * кол-во параметров). Т.е. чтобы добиться желаемого, нам нужно, чтобы stack_frame и (8 * кол-во параметров) были одинаковой кратности. Если параметров четное количество, то нужно обеспечить, чтоб stack_frame был кратен 16. Пусть параметров нечетное количесто, а адрес выровнен на 16. В таком случае нам нужно вычитать. Когда мы вызываем функцию выравнивания, адрес становится не кратным 16 (имеет вид 0xXXXX...X8). Поэтому мы просто берем младшие 4 бита. Если же параметров четное количество, то вычитать не нужно. В таком случае нам нужно инвертировать 3-й бит адреса стека в функции выравнивания.
 Пример компиляции функций выравнивания
+
 ![Alignment_disasm](README_pictures/Alignment_disasm.png)
 
 После функций выравнивания вызывается функция пуша параметров Compile_push_parameters_x64.
 
 Пример компиляции вызова функций
+
 In:
+
 ![Alignment_disasm](README_pictures/In_disasm.png)
+
 Out:
+
 ![Alignment_disasm](README_pictures/Out_disasm.png)
+
 Solve_quad_eq:
+
 Сначала вызывается функция выравнивания, потом Solve_quad_eq
+
 ![Alignment_disasm](README_pictures/Call_disasm.png)
 
 ### Ветвления (if)
+
 ![If](README_pictures/If.png)
 
 Основа ветвления - условные и безусловные прыжки. Начнем подробно разбирать, как они реализованы в RXcc.
@@ -689,7 +709,9 @@ bool Compile_if_x64(Dynamic_array* d_array_code, Dynamic_array* d_array_funcs, N
 ### Цикл (while)
 
 Примеры из [Code_example_dbg.png](https://github.com/Raptor-X102/Bin_translator/tree/main/examples/Debug/Code_example_dbg.png), исходный файл [Code_example.txt](https://github.com/Raptor-X102/Bin_translator/tree/main/examples/Input_data/Code_example.txt).
+
 ![While](README_pictures/While.png)
+
 Цикл построен следующим образом
 
 ```
@@ -740,6 +762,7 @@ bool Compile_while_x64(Dynamic_array* d_array_code, Dynamic_array* d_array_funcs
 </details>
 
 Пример компиляции
+
 ![While](README_pictures/While_disasm.png)
 
 ### Присваивание (=)
@@ -795,6 +818,7 @@ bool Compile_assignment_x64(Dynamic_array* d_array_code, Dynamic_array* d_array_
 </details>
 
 Пример компиляции
+
 ![Assignment_disasm](README_pictures/Assignment_disasm.png)
 
 
