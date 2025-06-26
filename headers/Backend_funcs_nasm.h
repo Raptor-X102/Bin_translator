@@ -28,6 +28,8 @@ const char Prologue_text_nasm[] = "section .text\n\t"
                                       "extern printf\n\t"
                                       "extern scanf\n";
 
+#define FORMAT_OUT_STRING "fmt_out"
+#define FORMAT_IN_STRING "fmt_in"
 const int Max_hex32_len = 10;       // 0x FF FF FF FF
                                     //  2  2  2  2  2 = 10
 const int Max_hex64_len = 18;       // 0x FF FF FF FF FF FF FF FF
@@ -211,7 +213,12 @@ bool Compile_assignment_nasm(Dynamic_array* d_array_code, Node* root, Func_data_
                             int64_t index);
 bool Compile_operator_nasm(Dynamic_array* d_array_code, Node* root, Func_data_list* func_list,
                           int64_t index);
-bool Compile_user_function_nasm(Dynamic_array* d_array_code, Node* root, Func_data_list* func_list, int64_t index);
+bool Compile_user_function_nasm(Dynamic_array* d_array_code, Node* root,
+                                Func_data_list* func_list, int64_t index);
+bool Compile_Out_function_nasm(Dynamic_array* d_array_code, Node* root,
+                        	   Func_data_list* func_list, int64_t index);
+bool Compile_In_function_nasm(Dynamic_array* d_array_code, Node* root,
+                        	  Func_data_list* func_list, int64_t index);
 bool Compile_push_parameters_nasm(Dynamic_array* d_array_code, Node* root, Func_data_list* func_list,
                                  int64_t index, int* parameters_pushed);
 

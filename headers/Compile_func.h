@@ -4,6 +4,7 @@
 #include "Lang_funcs.h"
 #include "Check_r_w_flags.h"
 #include "Binary_tree_graph_debug.h"
+#include "Simplification_funcs.h"
 
 #define SRC_FLAG "-s"
 #define SRC_FLAG_LEN sizeof(SRC_FLAG) - 1

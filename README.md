@@ -58,6 +58,8 @@ rbp
 
 ## Генерация кода из AST
 
+Базовые упрощения, такие как свертка констант и другие, реализованы с помощью функции [Simplification_funcs.cpp](https://github.com/Raptor-X102/Bin_translator/blob/main/Programminng_language/src/Simplification_funcs.cpp) - немного модифицированная функция из проекта [Дифференциатор](https://github.com/Raptor-X102/Differentiator).
+
 В данном разделе подробнее рассмотрим как в функции [Backend_funcs_x64.cpp](https://github.com/Raptor-X102/Bin_translator/blob/main/src/Backend_funcs_x64.cpp) и [Backend_funcs_nasm.cpp](https://github.com/Raptor-X102/Bin_translator/blob/main/src/Backend_funcs_nasm.cpp) транслируют код.
 Все примеры основаны на программах в [examples/Input_data](https://github.com/Raptor-X102/Bin_translator/tree/main/examples/Input_data). Если скомпилировать их с debug-фдагом "-d", создадутся AST ([examples/Debug](https://github.com/Raptor-X102/Bin_translator/tree/main/examples/Debug)).
 

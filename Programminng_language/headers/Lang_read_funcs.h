@@ -14,9 +14,11 @@ struct Lexeme_array {
 
     Lexeme_data* lex_arr;
     int64_t size;
+    int64_t capacity;
 };
 
 const int Mem_to_check = 2;
+const int Lex_arr_expansion_coeff = 2;
 
 #define INSERT_PARAMETER var_data = NULL;\
         memcpy(&var_data, &tmp_data->value, sizeof(Variable_data*));\
@@ -52,6 +54,7 @@ Buffer_data Lang_read_file(const char* filename);
 
 Lexeme_array* Lexeme_separator(char* expr_buffer, int64_t expr_buffer_size, Var_list* func_name_list);
 bool Lexeme_array_dtor(Lexeme_array* lexeme_array);
+bool Lexeme_array_push_back(Lexeme_array* lexeme_array, Node* node, int64_t line, int64_t col);
 Node* Get_Grammar(Lexeme_array* lexeme_array, int64_t* curr_lex, Func_data_list* func_list);
 Node* Get_if(Lexeme_array* lexeme_array, int64_t* curr_lex, int* offset, Func_data_list* func_list);
 Node* Get_while(Lexeme_array* lexeme_array, int64_t* curr_lex, int* offset,

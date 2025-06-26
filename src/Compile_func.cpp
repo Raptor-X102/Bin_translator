@@ -24,6 +24,13 @@ bool Compile_func(int argc, char* argv[]) {
         return false;
     }
 
+    Simplify_expression(&root, lexeme_arr);
+    if (!root) {
+
+        DEBUG_PRINTF("ERROR: function returned NULL\n");
+        return false;
+    }
+
     if (Input_files[My_asm_file_index])
         if (!Compile_to_ASM(Input_files[My_asm_file_index], root, &func_list))
             return false;;

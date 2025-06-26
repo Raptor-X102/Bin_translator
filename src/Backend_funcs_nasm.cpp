@@ -456,7 +456,8 @@ bool Compile_operator_nasm(Dynamic_array* d_array_code, Node* root, Func_data_li
     return true;
 }
 
-bool Compile_user_function_nasm(Dynamic_array* d_array_code, Node* root, Func_data_list* func_list, int64_t index) {
+bool Compile_user_function_nasm(Dynamic_array* d_array_code, Node* root,
+                                Func_data_list* func_list, int64_t index) {
 
     int symbols_written = 0;
     Node_data* tmp_data = NULL;
@@ -464,73 +465,16 @@ bool Compile_user_function_nasm(Dynamic_array* d_array_code, Node* root, Func_da
     Variable_data* var_data = NULL;
     memcpy(&var_data, &tmp_data->value, sizeof(Variable_data*));
 
-    if (!strncmp(var_data->var_name, "Out", var_data->var_len)) {        // TODO: make functions for 'Out' and 'In' insertion
+    if (!strncmp(var_data->var_name, "Out", var_data->var_len)) {
 
-        int32_t disp32 = 0, imm32 = 56;
-        int parameters_pushed = 0;
-        Compile_push_parameters_nasm(d_array_code, root->left_node, func_list, index, &parameters_pushed);
-        if (parameters_pushed != 1) {
-
-            DEBUG_PRINTF("ERROR: in func 'Out' wrong arguments amount\n");
+        if (!Compile_Out_function_nasm(d_array_code, root, func_list, index))
             return false;
-        }
-        MOVSD_XREG_MEM_DISP0_NASM(d_array_code, I_XMM1, I_RSP);
-        MOV_REG_MEM_DISP0_NASM(d_array_code, I_RDX, I_RSP);
-        SUB_REG_IMM_NASM(d_array_code, I_RSP, imm32); // need to allocate 64 bytes = 32 (shadow space) + 32 (space for xmm0-xmm3),
-                                                 // but 8 bytes already pushed as a parameter, so 56 bytes
-        //disp32 = 0x18;
-        //MOVSD_MEM_XREG_DISP0(d_array_code, I_RSP, I_XMM0, ); // windows calling conventions for debug
-        int64_t imm64 = 1;
-        MOV_REG_IMM64_NASM(d_array_code, I_RAX, imm64);
-        LEA_REG_RIP_REL_NASM(d_array_code, I_RCX, "fmt_out");       // TODO: make const or define "fmt_out"
-        CALL_FUNC_NASM(d_array_code, "printf", sizeof("printf") - 1);
-
-        imm32 = 64;
-        ADD_REG_IMM_NASM(d_array_code, I_RSP, imm32);
     }
 
-    else if (!strncmp(var_data->var_name, "In", var_data->var_len)) {        // TODO: make functions for 'Out' and 'In' insertion
+    else if (!strncmp(var_data->var_name, "In", var_data->var_len)) {
 
-        int32_t disp32 = 0, imm32 = 64;
-        SUB_REG_IMM_NASM(d_array_code, I_RSP, imm32);
-        LEA_REG_RIP_REL_NASM(d_array_code, I_RCX, "fmt_in");        // TODO: make const or define "fmt_in"
-
-        /*********Get parameter***********************************/
-        if (!root->left_node) {
-
-            DEBUG_PRINTF("ERROR: in func 'In' wrong arguments amount\n");
+        if (!Compile_In_function_nasm(d_array_code, root, func_list, index))
             return false;
-        }
-
-        memcpy(&tmp_data, &root->left_node->node_data, sizeof(Node_data*));
-        Variable_data* var_data = NULL;
-        memcpy(&var_data, &tmp_data->value, sizeof(Variable_data*));
-        int64_t var_index = Find_variable(&func_list->func_data[index].local_vars,
-                                        var_data->var_name, var_data->var_len);
-
-        if (var_index == -1) {
-
-            var_index = Find_variable(&func_list->func_data[index].parameters,
-                                    var_data->var_name, var_data->var_len);
-            if (var_index == -1) {
-
-                DEBUG_PRINTF("ERROR: variable '%.*s' was not found\n", var_data->var_len, var_data->var_name);
-                return false;
-            }
-
-            disp32 = (var_index + 2)* 8;    // +1 due to return address & RBP in stack
-            LEA_REG_MEM_NASM(d_array_code, I_RDX, I_RBP, disp32);
-        }
-
-        else {
-
-            disp32 = -((var_index + 1)* 8);    // +1 due to return address in stack
-            LEA_REG_MEM_NASM(d_array_code, I_RDX, I_RBP, disp32);
-        }
-        /************************************************************** */
-
-        CALL_FUNC_NASM(d_array_code, "scanf", sizeof("scanf") - 1);
-        ADD_REG_IMM_NASM(d_array_code, I_RSP, imm32);
     }
 
     else {
@@ -546,18 +490,19 @@ bool Compile_user_function_nasm(Dynamic_array* d_array_code, Node* root, Func_da
         int64_t parameters = (func_list->func_data[callee_index].parameters.free_var);
         if (!(parameters % 2)) {
 
-            check_alignment.var_name = strdup(Check_alignment_even);        // memleak, will be fixed later
+            check_alignment.var_name = strdup(Check_alignment_even);
             check_alignment.var_len = sizeof(Check_alignment_even) - 1;
         }
 
         else {
 
-            check_alignment.var_name = strdup(Check_alignment_odd);         // memleak, will be fixed later
+            check_alignment.var_name = strdup(Check_alignment_odd);
             check_alignment.var_len = sizeof(Check_alignment_odd) - 1;
         }
 
         int parameters_pushed = 0;
         CALL_FUNC_NASM(d_array_code, check_alignment.var_name, check_alignment.var_len);
+        free(check_alignment.var_name);
         SUB_REG_REG_NASM(d_array_code, I_RSP, I_RBX);
 
         Compile_push_parameters_nasm(d_array_code, root->left_node, func_list, index, &parameters_pushed);
@@ -572,6 +517,84 @@ bool Compile_user_function_nasm(Dynamic_array* d_array_code, Node* root, Func_da
         int32_t disp32 = 0;
         MOVSD_MEM_XREG_DISP0_NASM(d_array_code, I_RSP, I_XMM0);
     }
+
+    return true;
+}
+
+bool Compile_Out_function_nasm(Dynamic_array* d_array_code, Node* root,
+                                Func_data_list* func_list, int64_t index) {
+
+    int32_t disp32 = 0, imm32 = 56;
+    int parameters_pushed = 0;
+    int symbols_written = 0;
+    Compile_push_parameters_nasm(d_array_code, root->left_node, func_list, index, &parameters_pushed);
+    if (parameters_pushed != 1) {
+
+        DEBUG_PRINTF("ERROR: in func 'Out' wrong arguments amount\n");
+        return false;
+    }
+    MOVSD_XREG_MEM_DISP0_NASM(d_array_code, I_XMM1, I_RSP);
+    MOV_REG_MEM_DISP0_NASM(d_array_code, I_RDX, I_RSP);
+    SUB_REG_IMM_NASM(d_array_code, I_RSP, imm32); // need to allocate 64 bytes = 32 (shadow space) + 32 (space for xmm0-xmm3),
+                                                // but 8 bytes already pushed as a parameter, so 56 bytes
+    //disp32 = 0x18;
+    //MOVSD_MEM_XREG_DISP0(d_array_code, I_RSP, I_XMM0, ); // windows calling conventions for debug
+    int64_t imm64 = 1;
+    MOV_REG_IMM64_NASM(d_array_code, I_RAX, imm64);
+    LEA_REG_RIP_REL_NASM(d_array_code, I_RCX, FORMAT_OUT_STRING);
+    CALL_FUNC_NASM(d_array_code, "printf", sizeof("printf") - 1);
+
+    imm32 = 64;
+    ADD_REG_IMM_NASM(d_array_code, I_RSP, imm32);
+
+    return true;
+}
+
+bool Compile_In_function_nasm(Dynamic_array* d_array_code, Node* root,
+                              Func_data_list* func_list, int64_t index) {
+
+    int32_t disp32 = 0, imm32 = 64;
+    int symbols_written = 0;
+    SUB_REG_IMM_NASM(d_array_code, I_RSP, imm32);
+    LEA_REG_RIP_REL_NASM(d_array_code, I_RCX, FORMAT_IN_STRING);
+
+    /*********Get parameter***********************************/
+    if (!root->left_node) {
+
+        DEBUG_PRINTF("ERROR: in func 'In' wrong arguments amount\n");
+        return false;
+    }
+
+    Node_data* tmp_data = NULL;
+    memcpy(&tmp_data, &root->left_node->node_data, sizeof(Node_data*));
+    Variable_data* var_data = NULL;
+    memcpy(&var_data, &tmp_data->value, sizeof(Variable_data*));
+    int64_t var_index = Find_variable(&func_list->func_data[index].local_vars,
+                                    var_data->var_name, var_data->var_len);
+
+    if (var_index == -1) {
+
+        var_index = Find_variable(&func_list->func_data[index].parameters,
+                                var_data->var_name, var_data->var_len);
+        if (var_index == -1) {
+
+            DEBUG_PRINTF("ERROR: variable '%.*s' was not found\n", var_data->var_len, var_data->var_name);
+            return false;
+        }
+
+        disp32 = (var_index + 2)* 8;    // +1 due to return address & RBP in stack
+        LEA_REG_MEM_NASM(d_array_code, I_RDX, I_RBP, disp32);
+    }
+
+    else {
+
+        disp32 = -((var_index + 1)* 8);    // +1 due to return address in stack
+        LEA_REG_MEM_NASM(d_array_code, I_RDX, I_RBP, disp32);
+    }
+    /************************************************************** */
+
+    CALL_FUNC_NASM(d_array_code, "scanf", sizeof("scanf") - 1);
+    ADD_REG_IMM_NASM(d_array_code, I_RSP, imm32);
 
     return true;
 }

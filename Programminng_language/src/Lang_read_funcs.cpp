@@ -59,6 +59,35 @@ Buffer_data Lang_read_file(const char* filename) {
 	fclose(input_file);
 	return buffer_data;
 }
+bool Lexeme_array_push_back(Lexeme_array* lexeme_array, Node* node, int64_t line, int64_t col) {
+
+	if(!lexeme_array || !node) {
+
+		DEBUG_PRINTF("ERROR: null ptr\n");
+		return false;
+	}
+
+	if(lexeme_array->size >= lexeme_array->capacity) {
+
+		lexeme_array->capacity *= Lex_arr_expansion_coeff;
+		Lexeme_data* tmp_ptr = (Lexeme_data*) realloc(lexeme_array->lex_arr,
+									   sizeof(Lexeme_data) * lexeme_array->capacity);
+		if (!tmp_ptr) {
+
+			DEBUG_PRINTF("ERROR: memory was not allocated\n");
+			return NULL;
+		}
+
+		lexeme_array->lex_arr = tmp_ptr;
+	}
+
+	lexeme_array->lex_arr[lexeme_array->size].root = node;
+	lexeme_array->lex_arr[lexeme_array->size].line = line;
+	lexeme_array->lex_arr[lexeme_array->size].col = col;
+	lexeme_array->size++;
+
+	return true;
+}
 
 bool Lexeme_array_dtor(Lexeme_array* lexeme_array) {
 
@@ -89,14 +118,21 @@ bool Lexeme_array_dtor(Lexeme_array* lexeme_array) {
 Lexeme_array* Lexeme_separator(char* expr_buffer, int64_t expr_buffer_size, Var_list* func_name_list) {
 
 	Lexeme_array* lexeme_array = (Lexeme_array*) calloc(1, sizeof(Lexeme_array));
-	lexeme_array->lex_arr = (Lexeme_data*) calloc(expr_buffer_size + Mem_to_check, sizeof(Lexeme_data));
-	size_t lexeme_array_pos = 0;
-
 	if (!lexeme_array) {
 
 		DEBUG_PRINTF("ERROR: memory was not allocated\n");
 		return NULL;
 	}
+
+	lexeme_array->capacity = expr_buffer_size + Mem_to_check;
+	lexeme_array->lex_arr = (Lexeme_data*) calloc(expr_buffer_size + Mem_to_check, sizeof(Lexeme_data));
+	if (!lexeme_array->lex_arr) {
+
+		DEBUG_PRINTF("ERROR: memory was not allocated\n");
+		return NULL;
+	}
+
+	size_t lexeme_array_pos = 0;
 
 	for(int64_t curr_pos = 0, line = 1, col = 1; curr_pos < expr_buffer_size;) {
 

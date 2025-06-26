@@ -284,6 +284,10 @@ bool Compile_operator_x64(Dynamic_array* d_array_code, Dynamic_array* d_array_fu
                           int64_t index);
 bool Compile_user_function_x64(Dynamic_array* d_array_code, Dynamic_array* d_array_funcs,
                                Node* root, Func_data_list* func_list, int64_t index);
+bool Compile_Out_function_x64(Dynamic_array* d_array_code, Dynamic_array* d_array_funcs,
+                              Node* root, Func_data_list* func_list, int64_t index);
+bool Compile_In_function_x64(Dynamic_array* d_array_code, Dynamic_array* d_array_funcs,
+                              Node* root, Func_data_list* func_list, int64_t index);
 bool Compile_push_parameters_x64(Dynamic_array* d_array_code, Dynamic_array* d_array_funcs, Node* root, Func_data_list* func_list,
                                  int64_t index, int* parameters_pushed);
 

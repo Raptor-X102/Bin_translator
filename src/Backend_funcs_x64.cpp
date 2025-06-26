@@ -534,90 +534,16 @@ bool Compile_user_function_x64(Dynamic_array* d_array_code, Dynamic_array* d_arr
     Variable_data* var_data = NULL;
     memcpy(&var_data, &tmp_data->value, sizeof(Variable_data*));
 
-    if (!strncmp(var_data->var_name, "Out", var_data->var_len)) {      // TODO: make functions for 'Out' and 'In' insertion
+    if (!strncmp(var_data->var_name, "Out", var_data->var_len)) {
 
-        int32_t disp32 = 0, imm32 = 56;
-        int parameters_pushed = 0;
-        Compile_push_parameters_x64(d_array_code, d_array_funcs, root->left_node, func_list, index, &parameters_pushed);
-        if (parameters_pushed != 1) {
-
-            DEBUG_PRINTF("ERROR: in func 'Out' wrong arguments amount\n");
+        if (!Compile_Out_function_x64(d_array_code, d_array_funcs, root, func_list, index))
             return false;
-        }
-        MOVSD_XREG_MEM_DISP0(d_array_code, I_XMM1, I_RSP);
-        MOV_REG_MEM_DISP0(d_array_code, I_RDX, I_RSP);
-        SUB_REG_IMM(d_array_code, I_RSP, imm32); // need to allocate 64 bytes = 32 (shadow space) + 32 (space for xmm0-xmm3),
-                                                 // but 8 bytes already allocated (pushed as a parameter), so 56 bytes
-        //disp32 = 0x18;
-        //MOVSD_MEM_XREG_DISP0(d_array_code, I_RSP, I_XMM0, ); // windows calling conventions for debug, (not used)
-        int64_t imm64 = 1;
-        MOV_REG_IMM64(d_array_code, I_RAX, imm64);
-        uint32_t fill_address = d_array_code->size + 3; // before we put lea, + 3 lea byte
-        Dynamic_array_push_back(d_array_funcs, &fill_address, sizeof(uint32_t));
-        Dynamic_array_push_back(d_array_funcs, &Format_string_pf_addr_index, sizeof(int32_t));
-
-        LEA_REG_RIP_REL32(d_array_code, I_RCX, No_jmp_rel32);
-
-        fill_address = d_array_code->size + 1; // before we put call, + 1 call instr byte
-        Dynamic_array_push_back(d_array_funcs, &fill_address, sizeof(uint32_t));
-        Dynamic_array_push_back(d_array_funcs, &Printf_func_index, sizeof(int32_t));
-
-        CALL_REL32(d_array_code, No_jmp_rel32);
-
-        imm32 = 64;
-        ADD_REG_IMM(d_array_code, I_RSP, imm32);
     }
 
-    else if (!strncmp(var_data->var_name, "In", var_data->var_len)) {        // TODO: make functions for 'Out' and 'In' insertion
+    else if (!strncmp(var_data->var_name, "In", var_data->var_len)) {
 
-        int32_t disp32 = 0, imm32 = 64;
-        SUB_REG_IMM(d_array_code, I_RSP, imm32);
-
-        uint32_t fill_address = d_array_code->size + 3; // before we put lea, + 3 lea byte
-        Dynamic_array_push_back(d_array_funcs, &fill_address, sizeof(uint32_t));
-        Dynamic_array_push_back(d_array_funcs, &Format_string_sf_addr_index, sizeof(int32_t));
-        LEA_REG_RIP_REL32(d_array_code, I_RCX, No_jmp_rel32);
-
-        /*********Get parameter***********************************/
-        if (!root->left_node) {
-
-            DEBUG_PRINTF("ERROR: in func 'In' wrong arguments amount\n");
+        if (!Compile_In_function_x64(d_array_code, d_array_funcs, root, func_list, index))
             return false;
-        }
-
-        memcpy(&tmp_data, &root->left_node->node_data, sizeof(Node_data*));
-        Variable_data* var_data = NULL;
-        memcpy(&var_data, &tmp_data->value, sizeof(Variable_data*));
-        int64_t var_index = Find_variable(&func_list->func_data[index].local_vars,
-                                        var_data->var_name, var_data->var_len);
-
-        if (var_index == -1) {
-
-            var_index = Find_variable(&func_list->func_data[index].parameters,
-                                    var_data->var_name, var_data->var_len);
-            if (var_index == -1) {
-
-                DEBUG_PRINTF("ERROR: variable '%.*s' was not found\n", var_data->var_len, var_data->var_name);
-                return false;
-            }
-
-            disp32 = (var_index + 2)* 8;    // +1 due to return address & RBP in stack
-            LEA_REG_MEM(d_array_code, I_RDX, I_RBP, disp32);
-        }
-
-        else {
-
-            disp32 = -((var_index + 1)* 8);    // +1 due to return address in stack
-            LEA_REG_MEM(d_array_code, I_RDX, I_RBP, disp32);
-        }
-        /************************************************************** */
-
-        fill_address = d_array_code->size + 1; // before we put call, + 1 call instr byte
-        Dynamic_array_push_back(d_array_funcs, &fill_address, sizeof(uint32_t));
-        Dynamic_array_push_back(d_array_funcs, &Scanf_func_index, sizeof(int32_t));
-        CALL_REL32(d_array_code, No_jmp_rel32);
-
-        ADD_REG_IMM(d_array_code, I_RSP, imm32);
     }
 
     else {
@@ -633,13 +559,13 @@ bool Compile_user_function_x64(Dynamic_array* d_array_code, Dynamic_array* d_arr
         int64_t parameters = (func_list->func_data[callee_index].parameters.free_var);
         if (!(parameters % 2)) {
 
-            check_alignment.var_name = strdup(Check_alignment_even);    // memleak, will be fixed later
+            check_alignment.var_name = strdup(Check_alignment_even);
             check_alignment.var_len = sizeof(Check_alignment_even) - 1;
         }
 
         else {
 
-            check_alignment.var_name = strdup(Check_alignment_odd);     // memleak, will be fixed later
+            check_alignment.var_name = strdup(Check_alignment_odd);
             check_alignment.var_len = sizeof(Check_alignment_odd) - 1;
         }
 
@@ -650,6 +576,8 @@ bool Compile_user_function_x64(Dynamic_array* d_array_code, Dynamic_array* d_arr
             DEBUG_PRINTF("ERROR: 'check_alignment_ptr' function was not found\n");
             return false;
         }
+
+        free(check_alignment.var_name);
 
         uint32_t fill_address = d_array_code->size + 1; // before we put jmp instr, + 1 call byte
         Dynamic_array_push_back(d_array_funcs, &fill_address, sizeof(uint32_t));
@@ -673,6 +601,99 @@ bool Compile_user_function_x64(Dynamic_array* d_array_code, Dynamic_array* d_arr
         int32_t disp32 = 0;
         MOVSD_MEM_XREG_DISP0(d_array_code, I_RSP, I_XMM0);
     }
+
+    return true;
+}
+
+bool Compile_Out_function_x64(Dynamic_array* d_array_code, Dynamic_array* d_array_funcs,
+                              Node* root, Func_data_list* func_list, int64_t index) {
+
+    int32_t disp32 = 0, imm32 = 56;
+    int parameters_pushed = 0;
+    Compile_push_parameters_x64(d_array_code, d_array_funcs, root->left_node, func_list, index, &parameters_pushed);
+    if (parameters_pushed != 1) {
+
+        DEBUG_PRINTF("ERROR: in func 'Out' wrong arguments amount\n");
+        return false;
+    }
+    MOVSD_XREG_MEM_DISP0(d_array_code, I_XMM1, I_RSP);
+    MOV_REG_MEM_DISP0(d_array_code, I_RDX, I_RSP);
+    SUB_REG_IMM(d_array_code, I_RSP, imm32); // need to allocate 64 bytes = 32 (shadow space) + 32 (space for xmm0-xmm3),
+                                                // but 8 bytes already allocated (pushed as a parameter), so 56 bytes
+    //disp32 = 0x18;
+    //MOVSD_MEM_XREG_DISP0(d_array_code, I_RSP, I_XMM0, ); // windows calling conventions for debug, (not used)
+    int64_t imm64 = 1;
+    MOV_REG_IMM64(d_array_code, I_RAX, imm64);
+    uint32_t fill_address = d_array_code->size + 3; // before we put lea, + 3 lea byte
+    Dynamic_array_push_back(d_array_funcs, &fill_address, sizeof(uint32_t));
+    Dynamic_array_push_back(d_array_funcs, &Format_string_pf_addr_index, sizeof(int32_t));
+
+    LEA_REG_RIP_REL32(d_array_code, I_RCX, No_jmp_rel32);
+
+    fill_address = d_array_code->size + 1; // before we put call, + 1 call instr byte
+    Dynamic_array_push_back(d_array_funcs, &fill_address, sizeof(uint32_t));
+    Dynamic_array_push_back(d_array_funcs, &Printf_func_index, sizeof(int32_t));
+
+    CALL_REL32(d_array_code, No_jmp_rel32);
+
+    imm32 = 64;
+    ADD_REG_IMM(d_array_code, I_RSP, imm32);
+
+    return true;
+}
+
+bool Compile_In_function_x64(Dynamic_array* d_array_code, Dynamic_array* d_array_funcs,
+                              Node* root, Func_data_list* func_list, int64_t index) {
+
+    int32_t disp32 = 0, imm32 = 64;
+    SUB_REG_IMM(d_array_code, I_RSP, imm32);
+
+    uint32_t fill_address = d_array_code->size + 3; // before we put lea, + 3 lea byte
+    Dynamic_array_push_back(d_array_funcs, &fill_address, sizeof(uint32_t));
+    Dynamic_array_push_back(d_array_funcs, &Format_string_sf_addr_index, sizeof(int32_t));
+    LEA_REG_RIP_REL32(d_array_code, I_RCX, No_jmp_rel32);
+
+    /*********Get parameter***********************************/
+    if (!root->left_node) {
+
+        DEBUG_PRINTF("ERROR: in func 'In' wrong arguments amount\n");
+        return false;
+    }
+
+    Node_data* tmp_data = NULL;
+    memcpy(&tmp_data, &root->left_node->node_data, sizeof(Node_data*));
+    Variable_data* var_data = NULL;
+    memcpy(&var_data, &tmp_data->value, sizeof(Variable_data*));
+    int64_t var_index = Find_variable(&func_list->func_data[index].local_vars,
+                                    var_data->var_name, var_data->var_len);
+
+    if (var_index == -1) {
+
+        var_index = Find_variable(&func_list->func_data[index].parameters,
+                                var_data->var_name, var_data->var_len);
+        if (var_index == -1) {
+
+            DEBUG_PRINTF("ERROR: variable '%.*s' was not found\n", var_data->var_len, var_data->var_name);
+            return false;
+        }
+
+        disp32 = (var_index + 2)* 8;    // +1 due to return address & RBP in stack
+        LEA_REG_MEM(d_array_code, I_RDX, I_RBP, disp32);
+    }
+
+    else {
+
+        disp32 = -((var_index + 1)* 8);    // +1 due to return address in stack
+        LEA_REG_MEM(d_array_code, I_RDX, I_RBP, disp32);
+    }
+    /************************************************************** */
+
+    fill_address = d_array_code->size + 1; // before we put call, + 1 call instr byte
+    Dynamic_array_push_back(d_array_funcs, &fill_address, sizeof(uint32_t));
+    Dynamic_array_push_back(d_array_funcs, &Scanf_func_index, sizeof(int32_t));
+    CALL_REL32(d_array_code, No_jmp_rel32);
+
+    ADD_REG_IMM(d_array_code, I_RSP, imm32);
 
     return true;
 }
